@@ -1,5 +1,12 @@
 package chess;
 
+import java.util.Arrays;
+import java.util.Objects;
+
+import static chess.ChessGame.TeamColor.BLACK;
+import static chess.ChessGame.TeamColor.WHITE;
+//import static chess.ChessPiece.PieceType;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -7,9 +14,24 @@ package chess;
  * signature of the existing methods.
  */
 public class ChessBoard {
+    final private ChessPiece [][] board = new ChessPiece[8][8];
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessBoard that = (ChessBoard) o;
+        return Objects.deepEquals(board, that.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(board);
+    }
 
     public ChessBoard() {
-        
+
     }
 
     /**
@@ -19,7 +41,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+        this.board[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
     /**
@@ -30,7 +52,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+        return this.board[position.getRow() - 1][position.getColumn() - 1];
     }
 
     /**
@@ -38,6 +60,17 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        for (int pawnCol = 0; pawnCol < 8; pawnCol++) {
+            board[1][pawnCol] = new ChessPiece(WHITE, ChessPiece.PieceType.PAWN);
+            board[6][pawnCol] = new ChessPiece(BLACK, ChessPiece.PieceType.PAWN);
+        }
+        board[0][0] = new ChessPiece(WHITE, ChessPiece.PieceType.ROOK);
+        board[0][7] = new ChessPiece(WHITE, ChessPiece.PieceType.ROOK);
+        board[0][1] = new ChessPiece(WHITE, ChessPiece.PieceType.KNIGHT);
+        board[0][6] = new ChessPiece(WHITE, ChessPiece.PieceType.KNIGHT);
+        board[0][2] = new ChessPiece(WHITE, ChessPiece.PieceType.BISHOP);
+        board[0][5] = new ChessPiece(WHITE, ChessPiece.PieceType.BISHOP);
+        board[0][3] = new ChessPiece(WHITE, ChessPiece.PieceType.QUEEN);
+        board[0][4] = new ChessPiece(BLACK, ChessPiece.PieceType.KING);
     }
 }
