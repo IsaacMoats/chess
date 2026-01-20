@@ -25,7 +25,7 @@ public class ChessMove {
 
     final private ChessPosition startPosition;
     final private ChessPosition endPosition;
-    private ChessPiece.PieceType promotionPiece;
+    final private ChessPiece.PieceType promotionPiece;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
