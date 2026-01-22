@@ -1,0 +1,174 @@
+package chess;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+
+public class MoveCalculator {
+    private final ChessBoard board;
+    private final ChessPosition position;
+    private final ChessGame.TeamColor color;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MoveCalculator that = (MoveCalculator) o;
+        return Objects.equals(board, that.board) && Objects.equals(position, that.position) && color == that.color;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, position, color);
+    }
+
+    public MoveCalculator(ChessBoard board, ChessPosition position, ChessGame.TeamColor color) {
+        this.board = board;
+        this.position = position;
+        this.color = color;
+    }
+
+    public Collection<ChessMove> calculatePawnMoves(){
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        if (this.color == ChessGame.TeamColor.WHITE) {
+            ChessPosition forwardOne = new ChessPosition(this.position.getRow() + 1, this.position.getColumn());
+            if (position.getColumn() != 1) {
+                ChessPosition forwardLeft = new ChessPosition(this.position.getRow() + 1, this.position.getColumn() - 1);
+                if (board.getPiece(forwardLeft) != null) {
+                    if (board.getPiece(forwardLeft).getTeamColor() == ChessGame.TeamColor.BLACK) {
+                        if (forwardLeft.getRow() == 8) {
+                            ChessMove forwardLeftMoveQueen = new ChessMove(position, forwardLeft, ChessPiece.PieceType.QUEEN);
+                            ChessMove forwardLeftMoveRook = new ChessMove(position, forwardLeft, ChessPiece.PieceType.ROOK);
+                            ChessMove forwardLeftMoveBishop = new ChessMove(position, forwardLeft, ChessPiece.PieceType.BISHOP);
+                            ChessMove forwardLeftMoveKnight = new ChessMove(position, forwardLeft, ChessPiece.PieceType.KNIGHT);
+                            moves.add(forwardLeftMoveKnight);
+                            moves.add(forwardLeftMoveBishop);
+                            moves.add(forwardLeftMoveRook);
+                            moves.add(forwardLeftMoveQueen);
+                        } else {
+                            ChessMove forwardLeftMove = new ChessMove(position, forwardLeft, null);
+                            moves.add(forwardLeftMove);
+                        }
+                    }
+                }
+            }
+            if (position.getColumn() != 8) {
+                ChessPosition forwardRight = new ChessPosition(this.position.getRow() + 1, this.position.getColumn() + 1);
+                if (board.getPiece(forwardRight) != null) {
+                    if (board.getPiece(forwardRight).getTeamColor() == ChessGame.TeamColor.BLACK) {
+                        if (forwardRight.getRow() == 8) {
+                            ChessMove forwardRightMoveQueen = new ChessMove(position, forwardRight, ChessPiece.PieceType.QUEEN);
+                            ChessMove forwardRightMoveRook = new ChessMove(position, forwardRight, ChessPiece.PieceType.ROOK);
+                            ChessMove forwardRightMoveBishop = new ChessMove(position, forwardRight, ChessPiece.PieceType.BISHOP);
+                            ChessMove forwardRightMoveKnight = new ChessMove(position, forwardRight, ChessPiece.PieceType.KNIGHT);
+                            moves.add(forwardRightMoveKnight);
+                            moves.add(forwardRightMoveBishop);
+                            moves.add(forwardRightMoveRook);
+                            moves.add(forwardRightMoveQueen);
+                        } else {
+                            ChessMove forwardRightMove = new ChessMove(position, forwardRight, null);
+                            moves.add(forwardRightMove);
+                        }
+                    }
+                }
+            }
+            if (this.position.getRow() == 2) {
+                ChessPosition forwardTwo = new ChessPosition(this.position.getRow() + 2, this.position.getColumn());
+                if (board.getPiece(forwardTwo) == null && board.getPiece(forwardOne) == null) {
+                    ChessMove forwardTwoMove = new ChessMove(position, forwardTwo, null);
+                    moves.add(forwardTwoMove);
+                }
+            }
+            if (board.getPiece(forwardOne) == null) {
+                if (forwardOne.getRow() == 8) {
+                    ChessMove forwardOneMoveQueen = new ChessMove(position, forwardOne, ChessPiece.PieceType.QUEEN);
+                    ChessMove forwardOneMoveRook = new ChessMove(position, forwardOne, ChessPiece.PieceType.ROOK);
+                    ChessMove forwardOneMoveBishop = new ChessMove(position, forwardOne, ChessPiece.PieceType.BISHOP);
+                    ChessMove forwardOneMoveKnight = new ChessMove(position, forwardOne, ChessPiece.PieceType.KNIGHT);
+                    moves.add(forwardOneMoveKnight);
+                    moves.add(forwardOneMoveBishop);
+                    moves.add(forwardOneMoveRook);
+                    moves.add(forwardOneMoveQueen);
+
+                } else {
+                    ChessMove forwardOneMove = new ChessMove(position, forwardOne, null);
+                    moves.add(forwardOneMove);
+                }
+            }
+        }
+
+        if (this.color == ChessGame.TeamColor.BLACK) {
+            if (position.getRow() != 1) {
+                ChessPosition forwardOne = new ChessPosition(position.getRow() - 1, position.getColumn());
+                if (position.getColumn() != 1) {
+                    ChessPosition forwardLeft = new ChessPosition(position.getRow() - 1, position.getColumn() - 1);
+                    if (board.getPiece(forwardLeft) != null) {
+                        if (board.getPiece(forwardLeft).getTeamColor() == ChessGame.TeamColor.WHITE) {
+                            if (forwardLeft.getRow() == 1) {
+                                ChessMove forwardLeftMoveQueen = new ChessMove(position, forwardLeft, ChessPiece.PieceType.QUEEN);
+                                ChessMove forwardLeftMoveRook = new ChessMove(position, forwardLeft, ChessPiece.PieceType.ROOK);
+                                ChessMove forwardLeftMoveBishop = new ChessMove(position, forwardLeft, ChessPiece.PieceType.BISHOP);
+                                ChessMove forwardLeftMoveKnight = new ChessMove(position, forwardLeft, ChessPiece.PieceType.KNIGHT);
+                                moves.add(forwardLeftMoveKnight);
+                                moves.add(forwardLeftMoveBishop);
+                                moves.add(forwardLeftMoveRook);
+                                moves.add(forwardLeftMoveQueen);
+                            } else {
+                                ChessMove forwardLeftMove = new ChessMove(position, forwardLeft, null);
+                                moves.add(forwardLeftMove);
+                            }
+                        }
+                    }
+                }
+                if (position.getColumn() != 8) {
+                    ChessPosition forwardRight = new ChessPosition(position.getRow() - 1, position.getColumn() + 1);
+                    if (board.getPiece(forwardRight) != null) {
+                        if (forwardRight.getRow() == 1) {
+                            ChessMove forwardRightMoveQueen = new ChessMove(position, forwardRight, ChessPiece.PieceType.QUEEN);
+                            ChessMove forwardRightMoveRook = new ChessMove(position, forwardRight, ChessPiece.PieceType.ROOK);
+                            ChessMove forwardRightMoveBishop = new ChessMove(position, forwardRight, ChessPiece.PieceType.BISHOP);
+                            ChessMove forwardRightMoveKnight = new ChessMove(position, forwardRight, ChessPiece.PieceType.KNIGHT);
+                            moves.add(forwardRightMoveKnight);
+                            moves.add(forwardRightMoveBishop);
+                            moves.add(forwardRightMoveRook);
+                            moves.add(forwardRightMoveQueen);
+                        } else {
+                            ChessMove forwardRightMove = new ChessMove(position, forwardRight, null);
+                            moves.add(forwardRightMove);
+                        }
+                    }
+                }
+                if (this.position.getRow() == 7) {
+                    ChessPosition forwardTwo = new ChessPosition(this.position.getRow() - 2, this.position.getColumn());
+                    if (board.getPiece(forwardTwo) == null && board.getPiece(forwardOne) == null) {
+                        ChessMove forwardTwoMove = new ChessMove(position, forwardTwo, null);
+                        moves.add(forwardTwoMove);
+                    }
+                }
+                if (board.getPiece(forwardOne) == null) {
+                    if (forwardOne.getRow() == 1) {
+                        ChessMove forwardOneMoveQueen = new ChessMove(position, forwardOne, ChessPiece.PieceType.QUEEN);
+                        ChessMove forwardOneMoveRook = new ChessMove(position, forwardOne, ChessPiece.PieceType.ROOK);
+                        ChessMove forwardOneMoveBishop = new ChessMove(position, forwardOne, ChessPiece.PieceType.BISHOP);
+                        ChessMove forwardOneMoveKnight = new ChessMove(position, forwardOne, ChessPiece.PieceType.KNIGHT);
+                        moves.add(forwardOneMoveKnight);
+                        moves.add(forwardOneMoveBishop);
+                        moves.add(forwardOneMoveRook);
+                        moves.add(forwardOneMoveQueen);
+
+                    } else {
+                        ChessMove forwardOneMove = new ChessMove(position, forwardOne, null);
+                        moves.add(forwardOneMove);
+                    }
+                }
+            }
+        }
+        return moves;
+    }
+
+//    public Collection<ChessMove> calculateMoves() {
+//        return;
+//    }
+
+}
