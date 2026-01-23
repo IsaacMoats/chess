@@ -533,6 +533,11 @@ public class MoveCalculator {
         return moves;
     }
 
+    public Collection<ChessMove> calculateQueenMoves(){
+        ArrayList<ChessMove> moves = new ArrayList<>(calculateBishopMoves());
+        moves.addAll(calculateRookMoves());
+        return moves;
+    }
 //    public Collection<ChessMove> calculateMoves() {
 //        return;
 //    }
