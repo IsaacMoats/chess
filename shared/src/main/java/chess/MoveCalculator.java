@@ -393,11 +393,143 @@ public class MoveCalculator {
         return moves;
     }
 
+    private Collection<ChessMove> calculateForwardLeft(){
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        if (position.getColumn() == 1 || position.getRow() == 8) {
+            return moves;
+        }
+        ChessPosition left = new ChessPosition(position.getRow() + 1, position.getColumn() - 1);
+        if (board.getPiece(left) != null) {
+            if (board.getPiece(left).getTeamColor() != color) {
+                ChessMove forwardMove = new ChessMove(position, left, null);
+                moves.add(forwardMove);
+            }
+            return moves;
+        } else {
+            ChessMove forwardMove = new ChessMove(position, left, null);
+            moves.add(forwardMove);
+        }
+        while (left.getColumn() != 1 && left.getRow() != 8) {
+            left =  new ChessPosition(left.getRow() + 1, left.getColumn() - 1);
+            if (board.getPiece(left) != null) {
+                if (board.getPiece(left).getTeamColor() != color) {
+                    ChessMove forwardMove = new ChessMove(position, left, null);
+                    moves.add(forwardMove);
+                }
+                break;
+            }
+            ChessMove forwardMove = new ChessMove(position, left, null);
+            moves.add(forwardMove);
+        }
+        return moves;
+    }
+
+    private Collection<ChessMove> calculateForwardRight(){
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        if (position.getColumn() == 8 || position.getRow() == 8) {
+            return moves;
+        }
+        ChessPosition left = new ChessPosition(position.getRow() + 1, position.getColumn() + 1);
+        if (board.getPiece(left) != null) {
+            if (board.getPiece(left).getTeamColor() != color) {
+                ChessMove forwardMove = new ChessMove(position, left, null);
+                moves.add(forwardMove);
+            }
+            return moves;
+        } else {
+            ChessMove forwardMove = new ChessMove(position, left, null);
+            moves.add(forwardMove);
+        }
+        while (left.getColumn() != 8 && left.getRow() != 8) {
+            left =  new ChessPosition(left.getRow() + 1, left.getColumn() + 1);
+            if (board.getPiece(left) != null) {
+                if (board.getPiece(left).getTeamColor() != color) {
+                    ChessMove forwardMove = new ChessMove(position, left, null);
+                    moves.add(forwardMove);
+                }
+                break;
+            }
+            ChessMove forwardMove = new ChessMove(position, left, null);
+            moves.add(forwardMove);
+        }
+        return moves;
+    }
+
+    private Collection<ChessMove> calculateBackwardLeft(){
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        if (position.getColumn() == 1 || position.getRow() == 1) {
+            return moves;
+        }
+        ChessPosition left = new ChessPosition(position.getRow() - 1, position.getColumn() - 1);
+        if (board.getPiece(left) != null) {
+            if (board.getPiece(left).getTeamColor() != color) {
+                ChessMove forwardMove = new ChessMove(position, left, null);
+                moves.add(forwardMove);
+            }
+            return moves;
+        } else {
+            ChessMove forwardMove = new ChessMove(position, left, null);
+            moves.add(forwardMove);
+        }
+        while (left.getColumn() != 1 && left.getRow() != 1) {
+            left =  new ChessPosition(left.getRow() - 1, left.getColumn() - 1);
+            if (board.getPiece(left) != null) {
+                if (board.getPiece(left).getTeamColor() != color) {
+                    ChessMove forwardMove = new ChessMove(position, left, null);
+                    moves.add(forwardMove);
+                }
+                break;
+            }
+            ChessMove forwardMove = new ChessMove(position, left, null);
+            moves.add(forwardMove);
+        }
+        return moves;
+    }
+
+    private Collection<ChessMove> calculateBackwardRight(){
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        if (position.getColumn() == 8 || position.getRow() == 1) {
+            return moves;
+        }
+        ChessPosition left = new ChessPosition(position.getRow() - 1, position.getColumn() + 1);
+        if (board.getPiece(left) != null) {
+            if (board.getPiece(left).getTeamColor() != color) {
+                ChessMove forwardMove = new ChessMove(position, left, null);
+                moves.add(forwardMove);
+            }
+            return moves;
+        } else {
+            ChessMove forwardMove = new ChessMove(position, left, null);
+            moves.add(forwardMove);
+        }
+        while (left.getColumn() != 8 && left.getRow() != 1) {
+            left =  new ChessPosition(left.getRow() - 1, left.getColumn() + 1);
+            if (board.getPiece(left) != null) {
+                if (board.getPiece(left).getTeamColor() != color) {
+                    ChessMove forwardMove = new ChessMove(position, left, null);
+                    moves.add(forwardMove);
+                }
+                break;
+            }
+            ChessMove forwardMove = new ChessMove(position, left, null);
+            moves.add(forwardMove);
+        }
+        return moves;
+    }
+
     public Collection<ChessMove> calculateRookMoves(){
         ArrayList<ChessMove> moves = new ArrayList<>(calculateForwardContinuous());
         moves.addAll(calculateBackwardContinuous());
         moves.addAll(calculateLeftContinuous());
         moves.addAll(calculateRightContinuous());
+        return moves;
+    }
+
+    public Collection<ChessMove> calculateBishopMoves(){
+        ArrayList<ChessMove> moves = new ArrayList<>(calculateForwardRight());
+        moves.addAll(calculateForwardLeft());
+        moves.addAll(calculateBackwardLeft());
+        moves.addAll(calculateBackwardRight());
         return moves;
     }
 
