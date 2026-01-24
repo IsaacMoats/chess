@@ -556,8 +556,8 @@ public class MoveCalculator {
             if (position.getColumn() <= 7) {
                 ChessPosition forwardRight = new ChessPosition(position.getRow() + 2, position.getColumn() + 1);
                 ChessMove forwardRightMove = new ChessMove(position, forwardRight, null);
-                if (board.getPiece(position) != null) {
-                    if (board.getPiece(position).getTeamColor() != color) {
+                if (board.getPiece(forwardRight) != null) {
+                    if (board.getPiece(forwardRight).getTeamColor() != color) {
                         moves.add(forwardRightMove);
                     }
                 } else {
@@ -580,8 +580,8 @@ public class MoveCalculator {
             if (position.getColumn() <= 7) {
                 ChessPosition backwardRight = new ChessPosition(position.getRow() - 2, position.getColumn() + 1);
                 ChessMove backwardRightMove = new ChessMove(position, backwardRight, null);
-                if (board.getPiece(position) != null) {
-                    if (board.getPiece(position).getTeamColor() != color) {
+                if (board.getPiece(backwardRight) != null) {
+                    if (board.getPiece(backwardRight).getTeamColor() != color) {
                         moves.add(backwardRightMove);
                     }
                 } else {
