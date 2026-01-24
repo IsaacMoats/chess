@@ -133,6 +133,9 @@ public class ChessPiece {
         if (this.piece == PieceType.QUEEN) {
             return calculateMoves.calculateQueenMoves();
         }
+        if (this.piece == PieceType.KNIGHT) {
+            return calculateMoves.calculateKnightMoves();
+        }
         return calculateMoves.calculatePawnMoves();
     }
 }
