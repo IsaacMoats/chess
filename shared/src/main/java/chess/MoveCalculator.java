@@ -539,108 +539,53 @@ public class MoveCalculator {
         return moves;
     }
 
+    private Collection<ChessMove> calculateKnightMoveHelper(int rowMove, int columnMove){
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        ChessPosition newPosition = new ChessPosition(position.getRow() + rowMove, position.getColumn() + columnMove);
+        ChessMove movement = new ChessMove(position, newPosition, null);
+        if (board.getPiece(newPosition) != null) {
+            if (board.getPiece(newPosition).getTeamColor() != color) {
+                moves.add(movement);
+            }
+        } else {
+            moves.add(movement);
+        }
+        return moves;
+    }
     public Collection<ChessMove> calculateKnightMoves(){
         ArrayList<ChessMove> moves = new ArrayList<>();
         if (position.getRow() <= 6) {
             if (position.getColumn() >= 2) {
-                ChessPosition forwardLeft = new ChessPosition(position.getRow() + 2, position.getColumn() - 1);
-                ChessMove forwardLeftMove = new ChessMove(position, forwardLeft, null);
-                if (board.getPiece(forwardLeft) != null) {
-                    if (board.getPiece(forwardLeft).getTeamColor() != color) {
-                        moves.add(forwardLeftMove);
-                    }
-                } else {
-                    moves.add(forwardLeftMove);
-                }
+                moves.addAll(calculateKnightMoveHelper(2, -1));
             }
             if (position.getColumn() <= 7) {
-                ChessPosition forwardRight = new ChessPosition(position.getRow() + 2, position.getColumn() + 1);
-                ChessMove forwardRightMove = new ChessMove(position, forwardRight, null);
-                if (board.getPiece(forwardRight) != null) {
-                    if (board.getPiece(forwardRight).getTeamColor() != color) {
-                        moves.add(forwardRightMove);
-                    }
-                } else {
-                    moves.add(forwardRightMove);
-                }
+                moves.addAll(calculateKnightMoveHelper(2, 1));
             }
         }
         if (position.getRow() >= 3) {
             if (position.getColumn() >= 2) {
-                ChessPosition backwardLeft = new ChessPosition(position.getRow() - 2, position.getColumn() - 1);
-                ChessMove backwardLeftMove = new ChessMove(position, backwardLeft, null);
-                if (board.getPiece(backwardLeft) != null) {
-                    if (board.getPiece(backwardLeft).getTeamColor() != color) {
-                        moves.add(backwardLeftMove);
-                    }
-                } else {
-                    moves.add(backwardLeftMove);
-                }
+                moves.addAll(calculateKnightMoveHelper(-2, -1));
             }
             if (position.getColumn() <= 7) {
-                ChessPosition backwardRight = new ChessPosition(position.getRow() - 2, position.getColumn() + 1);
-                ChessMove backwardRightMove = new ChessMove(position, backwardRight, null);
-                if (board.getPiece(backwardRight) != null) {
-                    if (board.getPiece(backwardRight).getTeamColor() != color) {
-                        moves.add(backwardRightMove);
-                    }
-                } else {
-                    moves.add(backwardRightMove);
-                }
+                moves.addAll(calculateKnightMoveHelper(-2, 1));
             }
         }
         if (position.getColumn() <= 6) {
             if (position.getRow() >= 2) {
-                ChessPosition rightDown = new ChessPosition(position.getRow() - 1, position.getColumn() + 2);
-                ChessMove rightDownMove = new ChessMove(position, rightDown, null);
-                if (board.getPiece(rightDown) != null) {
-                    if (board.getPiece(rightDown).getTeamColor() != color) {
-                        moves.add(rightDownMove);
-                    }
-                } else {
-                    moves.add(rightDownMove);
-                }
+                moves.addAll(calculateKnightMoveHelper(-1, 2));
             }
             if (position.getRow() <= 7) {
-                ChessPosition rightUp = new ChessPosition(position.getRow() + 1, position.getColumn() + 2);
-                ChessMove rightUpMove = new ChessMove(position, rightUp, null);
-                if (board.getPiece(rightUp) != null) {
-                    if (board.getPiece(rightUp).getTeamColor() != color) {
-                        moves.add(rightUpMove);
-                    }
-                } else {
-                    moves.add(rightUpMove);
-                }
+                moves.addAll(calculateKnightMoveHelper(1, 2));
             }
         }
         if (position.getColumn() >= 3) {
             if (position.getRow() >= 2) {
-                ChessPosition leftDown = new ChessPosition(position.getRow() - 1, position.getColumn() - 2);
-                ChessMove leftDownMove = new ChessMove(position, leftDown, null);
-                if (board.getPiece(leftDown) != null) {
-                    if (board.getPiece(leftDown).getTeamColor() != color) {
-                        moves.add(leftDownMove);
-                    }
-                } else {
-                    moves.add(leftDownMove);
-                }
+                moves.addAll(calculateKnightMoveHelper(-1, -2));
             }
             if (position.getRow() <= 7) {
-                ChessPosition leftUp = new ChessPosition(position.getRow() + 1, position.getColumn() - 2);
-                ChessMove leftUpMove = new ChessMove(position, leftUp, null);
-                if (board.getPiece(leftUp) != null) {
-                    if (board.getPiece(leftUp).getTeamColor() != color) {
-                        moves.add(leftUpMove);
-                    }
-                } else {
-                    moves.add(leftUpMove);
-                }
+                moves.addAll(calculateKnightMoveHelper(1, -2));
             }
         }
         return moves;
     }
-//    public Collection<ChessMove> calculateMoves() {
-//        return;
-//    }
-
 }
