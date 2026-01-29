@@ -68,6 +68,14 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         throw new RuntimeException("Not implemented");
+        /*
+         * Only valid moves while in check is getting the king out of check - can move the king, capture the piece
+         * causing the check, or block the move
+         * simulate move with a piece and then check to see if the king is in danger after the proposed move
+         * then for valid moves for the king simulate the move and then make sure that the king is no longer in check
+         * if it is already in check
+         *
+         * */
     }
 
     /**
@@ -88,6 +96,13 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
+        /*
+         * Find where the king is
+         * Keep a member variable of the location of both kings - will be updated every time the king moves
+         * Determine if that position is in the list of possible movements of the opposite team
+         * The opposite team will move, then the list of possible movements should be updated to account for the movement
+         *
+         */
     }
 
     /**
@@ -98,6 +113,7 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
+
     }
 
     /**
