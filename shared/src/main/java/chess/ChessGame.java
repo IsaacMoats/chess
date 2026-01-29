@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -10,6 +11,22 @@ import java.util.Collection;
  */
 public class ChessGame {
 
+    private ChessGame.TeamColor teamTurn = TeamColor.WHITE;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return teamTurn == chessGame.teamTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(teamTurn);
+    }
+
     public ChessGame() {
 
     }
@@ -18,7 +35,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return teamTurn;
     }
 
     /**
@@ -27,7 +44,11 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        if (teamTurn == TeamColor.WHITE) {
+            this.teamTurn = TeamColor.BLACK;
+        } else {
+            this.teamTurn = TeamColor.WHITE;
+        }
     }
 
     /**
@@ -47,6 +68,14 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         throw new RuntimeException("Not implemented");
+        /*
+         * Only valid moves while in check is getting the king out of check - can move the king, capture the piece
+         * causing the check, or block the move
+         * simulate move with a piece and then check to see if the king is in danger after the proposed move
+         * then for valid moves for the king simulate the move and then make sure that the king is no longer in check
+         * if it is already in check
+         *
+         * */
     }
 
     /**
@@ -67,6 +96,13 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
+        /*
+         * Find where the king is
+         * Keep a member variable of the location of both kings - will be updated every time the king moves
+         * Determine if that position is in the list of possible movements of the opposite team
+         * The opposite team will move, then the list of possible movements should be updated to account for the movement
+         *
+         */
     }
 
     /**
@@ -77,6 +113,7 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
+
     }
 
     /**
