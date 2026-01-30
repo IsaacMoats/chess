@@ -33,6 +33,20 @@ public class ChessBoard {
         return Arrays.deepHashCode(board);
     }
 
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer();
+        for (int i = 1; i < 9; i++){
+            for (int j = 1; j < 9; j++){
+                ChessPosition position = new ChessPosition(i, j);
+                if (this.getPiece(position) != null){
+                    sb.append(this.getPiece(position).getPieceType());
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *
