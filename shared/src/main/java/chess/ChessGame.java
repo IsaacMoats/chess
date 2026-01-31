@@ -102,6 +102,7 @@ public class ChessGame {
          * */
         ChessPiece piece = board.getPiece(startPosition);
         if (piece == null) return moves;
+
         return moves;
     }
 
@@ -140,7 +141,8 @@ public class ChessGame {
                     if(board.getPiece(checkPosition).getTeamColor() != teamColor){
                         moves.addAll(board.getPiece(checkPosition).pieceMoves(this.board, checkPosition));
                         for (ChessMove move : moves) {
-                            if (move.getEndPosition() == kingPosition) {
+                            if (move.getEndPosition().getColumn() == kingPosition.getColumn() &&
+                                move.getEndPosition().getRow() == kingPosition.getRow()) {
                                 board.addPiece(kingPosition, kingPiece);
                                 return true;
                             }
