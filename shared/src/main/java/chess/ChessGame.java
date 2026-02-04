@@ -108,20 +108,16 @@ public class ChessGame {
             ChessPosition end = move.getEndPosition();
             ChessPiece capturePiece = board.getPiece(end);
             if (teamTurn == TeamColor.WHITE){
+                this.board.addPiece(end, piece);
+                this.board.addPiece(start, null);
                 if (isInCheck(TeamColor.WHITE)){
-                    this.board.addPiece(end, piece);
-                    this.board.addPiece(start, null);
-                    if (isInCheck(TeamColor.WHITE)){
-                        moves.remove(move);
-                    }
+                    moves.remove(move);
                 }
             } else {
+                this.board.addPiece(end, piece);
+                this.board.addPiece(start, null);
                 if (isInCheck(TeamColor.BLACK)){
-                    this.board.addPiece(end, piece);
-                    this.board.addPiece(start, null);
-                    if (isInCheck(TeamColor.BLACK)){
-                        moves.remove(move);
-                    }
+                    moves.remove(move);
                 }
             }
             this.board.addPiece(end, capturePiece);
@@ -139,9 +135,13 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
-        ChessPiece piece = board.getPiece(start);
-        this.board.addPiece(end, piece);
-        this.board.addPiece(start, null);
+        if (validMoves(start).contains(move)) {
+            ChessPiece piece = board.getPiece(start);
+            this.board.addPiece(end, piece);
+            this.board.addPiece(start, null);
+        } else {
+            throw new InvalidMoveException("Bad move");
+        }
     }
 
     /**
