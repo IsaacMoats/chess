@@ -101,8 +101,32 @@ public class ChessGame {
          *
          * */
         ChessPiece piece = board.getPiece(startPosition);
-        if (piece == null) return moves;
-
+        if (piece == null) return null;
+        moves.addAll(piece.pieceMoves(this.board, startPosition));
+        for (ChessMove move : moves){
+            ChessPosition start = move.getStartPosition();
+            ChessPosition end = move.getEndPosition();
+            ChessPiece capturePiece = board.getPiece(end);
+            if (teamTurn == TeamColor.WHITE){
+                if (isInCheck(TeamColor.WHITE)){
+                    this.board.addPiece(end, piece);
+                    this.board.addPiece(start, null);
+                    if (isInCheck(TeamColor.WHITE)){
+                        moves.remove(move);
+                    }
+                }
+            } else {
+                if (isInCheck(TeamColor.BLACK)){
+                    this.board.addPiece(end, piece);
+                    this.board.addPiece(start, null);
+                    if (isInCheck(TeamColor.BLACK)){
+                        moves.remove(move);
+                    }
+                }
+            }
+            this.board.addPiece(end, capturePiece);
+            this.board.addPiece(start, piece);
+        }
         return moves;
     }
 
@@ -113,7 +137,11 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        ChessPiece piece = board.getPiece(start);
+        this.board.addPiece(end, piece);
+        this.board.addPiece(start, null);
     }
 
     /**
