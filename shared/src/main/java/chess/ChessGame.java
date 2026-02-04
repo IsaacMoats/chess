@@ -135,10 +135,27 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
+        ChessGame.TeamColor pieceTeam = board.getPiece(start).getTeamColor();
+        if (this.board.getPiece(start) == null){
+            throw new InvalidMoveException("No piece");
+        }
+        if (pieceTeam != getTeamTurn()){
+            throw new InvalidMoveException("Not your turn");
+        }
         if (validMoves(start).contains(move)) {
             ChessPiece piece = board.getPiece(start);
-            this.board.addPiece(end, piece);
+            if (move.getPromotionPiece() != null){
+                ChessPiece promotionPiece = new ChessPiece(pieceTeam, move.getPromotionPiece());
+                this.board.addPiece(end, promotionPiece);
+            } else{
+                this.board.addPiece(end, piece);
+            }
             this.board.addPiece(start, null);
+            if (getTeamTurn() == TeamColor.WHITE){
+                setTeamTurn(TeamColor.BLACK);
+            } else {
+                setTeamTurn(TeamColor.WHITE);
+            }
         } else {
             throw new InvalidMoveException("Bad move");
         }
