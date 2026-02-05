@@ -23,7 +23,7 @@ public class ChessGame {
                 if (board.getPiece(positionCheck) != null &&
                     board.getPiece(positionCheck).getPieceType() == ChessPiece.PieceType.KING &&
                     board.getPiece(positionCheck).getTeamColor() == team){
-                    kingPosition = positionCheck;
+                    return positionCheck;
                 }
             }
         }
@@ -102,7 +102,9 @@ public class ChessGame {
          * */
         // Create the piece and return the base case of there not being a piece in the given start location
         ChessPiece piece = board.getPiece(startPosition);
-        if (piece == null) return new ArrayList<>();
+        if (piece == null) {
+            return new ArrayList<>();
+        }
         // Gather possible pieces and iterate through them
         ArrayList<ChessMove> moves = new ArrayList<>(piece.pieceMoves(this.board, startPosition));
         for (ChessMove move : new ArrayList<>(moves)){
@@ -112,17 +114,39 @@ public class ChessGame {
             ChessPiece capturePiece = board.getPiece(end);
             // If it is whites turn, simulate the move and remove it from the list if it causes white to be in check
             if (teamTurn == TeamColor.WHITE){
-                this.board.addPiece(end, piece);
+                if (move.getPromotionPiece() != null){
+                    ChessPiece promotion = new ChessPiece(TeamColor.WHITE, move.getPromotionPiece());
+                    this.board.addPiece(end, promotion);
+                } else {
+                    this.board.addPiece(end, piece);
+                }
                 this.board.addPiece(start, null);
-                if (isInCheck(TeamColor.WHITE)){
-                    moves.remove(move);
+                if (piece.getTeamColor() == TeamColor.WHITE){
+                    if (isInCheck(TeamColor.WHITE)){
+                        moves.remove(move);
+                    }
+                } else{
+                    if (isInCheck(TeamColor.BLACK)){
+                        moves.remove(move);
+                    }
                 }
             // If it is blacks turn, simulate the move and remove it from the list if it causes black to be in check
-            } else {
-                this.board.addPiece(end, piece);
+            } else if (teamTurn == TeamColor.BLACK) {
+                if (move.getPromotionPiece() != null){
+                    ChessPiece promotion = new ChessPiece(TeamColor.BLACK, move.getPromotionPiece());
+                    this.board.addPiece(end, promotion);
+                } else{
+                    this.board.addPiece(end, piece);
+                }
                 this.board.addPiece(start, null);
-                if (isInCheck(TeamColor.BLACK)){
-                    moves.remove(move);
+                if (piece.getTeamColor() == TeamColor.WHITE){
+                    if (isInCheck(TeamColor.WHITE)){
+                        moves.remove(move);
+                    }
+                } else{
+                    if (isInCheck(TeamColor.BLACK)){
+                        moves.remove(move);
+                    }
                 }
             }
             // Undo the move
@@ -183,9 +207,6 @@ public class ChessGame {
          */
         // Find king and store the piece information
         ChessPosition kingPosition = findKing(teamColor);
-        ChessPiece kingPiece = new ChessPiece(teamColor, ChessPiece.PieceType.KING);
-        // Remove the king from the board
-        board.addPiece(kingPosition, null);
         ArrayList<ChessMove> moves = new ArrayList<>();
         // Iterate through the board
         for (int row = 1; row < 9; row++){
@@ -198,7 +219,6 @@ public class ChessGame {
                     for (ChessMove move : moves) {
                         // If a move ends on where the king was, the king was in check
                         if (move.getEndPosition().equals(kingPosition)) {
-                            board.addPiece(kingPosition, kingPiece);
                             return true;
                         }
                     }
@@ -206,7 +226,6 @@ public class ChessGame {
             }
         }
         // Place the king back on the board and return the base case
-        board.addPiece(kingPosition, kingPiece);
         return false;
 
     }
