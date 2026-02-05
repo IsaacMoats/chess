@@ -242,7 +242,9 @@ public class ChessGame {
         for (int i = 1; i < 9; i++){
             for (int j = 1; j < 9; j++){
                 ChessPosition position = new ChessPosition(i, j);
-                moves.addAll(validMoves(position));
+                if (board.getPiece(position) != null && board.getPiece(position).getTeamColor() == teamColor){
+                    moves.addAll(validMoves(position));
+                }
                 System.out.print("Position: " + position + " ");
                 System.out.print("Valid Moves: " + validMoves(position) + " \n");
             }
@@ -262,12 +264,14 @@ public class ChessGame {
         for (int i = 1; i < 9; i++){
             for (int j = 1; j < 9; j++){
                 ChessPosition position = new ChessPosition(i, j);
-                moves.addAll(validMoves(position));
+                if (board.getPiece(position) != null && board.getPiece(position).getTeamColor() == teamColor){
+                    moves.addAll(validMoves(position));
+                }
                 System.out.print("Position: " + position + " ");
                 System.out.print("Valid Moves: " + validMoves(position) + " \n");
             }
         }
-        return isInCheck(teamColor) && (!isInCheckmate(teamColor)) && moves.isEmpty();
+        return (!isInCheck(teamColor)) && (!isInCheckmate(teamColor)) && moves.isEmpty();
     }
 
     /**
