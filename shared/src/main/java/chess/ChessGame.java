@@ -238,14 +238,16 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         // Call valid moves and make if empty return true
+        ArrayList <ChessMove> moves = new ArrayList<>();
         for (int i = 1; i < 9; i++){
             for (int j = 1; j < 9; j++){
                 ChessPosition position = new ChessPosition(i, j);
-                System.out.print("Position: " + position + "\n");
-                System.out.print("Valid Moves: " + validMoves(position));
+                moves.addAll(validMoves(position));
+                System.out.print("Position: " + position + " ");
+                System.out.print("Valid Moves: " + validMoves(position) + " \n");
             }
         }
-        return isInCheck(teamColor);
+        return isInCheck(teamColor) && moves.isEmpty();
     }
 
     /**
@@ -256,7 +258,16 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        return isInCheck(teamColor) && (!isInCheckmate(teamColor));
+        ArrayList <ChessMove> moves = new ArrayList<>();
+        for (int i = 1; i < 9; i++){
+            for (int j = 1; j < 9; j++){
+                ChessPosition position = new ChessPosition(i, j);
+                moves.addAll(validMoves(position));
+                System.out.print("Position: " + position + " ");
+                System.out.print("Valid Moves: " + validMoves(position) + " \n");
+            }
+        }
+        return isInCheck(teamColor) && (!isInCheckmate(teamColor)) && moves.isEmpty();
     }
 
     /**
