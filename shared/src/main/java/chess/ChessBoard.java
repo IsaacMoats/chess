@@ -36,13 +36,21 @@ public class ChessBoard {
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer();
-        for (int i = 1; i < 9; i++){
+        for (int i = 8; i > 0; i--){
             for (int j = 1; j < 9; j++){
                 ChessPosition position = new ChessPosition(i, j);
                 if (this.getPiece(position) != null){
-                    sb.append(this.getPiece(position).getPieceType());
+                    if (this.getPiece(position).getTeamColor() == WHITE){
+                        sb.append(this.getPiece(position).getPieceType());
+                    } else{
+                        sb.append(this.getPiece(position).getPieceType().toString().toLowerCase());
+                    }
+                    sb.append("|");
+                } else {
+                    sb.append("\t|");
                 }
             }
+            sb.append("\n");
         }
         return sb.toString();
     }

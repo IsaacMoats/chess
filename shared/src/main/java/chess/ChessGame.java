@@ -15,6 +15,9 @@ public class ChessGame {
     private ChessGame.TeamColor teamTurn = TeamColor.WHITE;
     private ChessBoard board = new ChessBoard();
 
+    /**
+     * Returns the position of the king for the given team as a ChessPosition object.
+     */
     private ChessPosition findKing(TeamColor team){
         ChessPosition kingPosition = new ChessPosition(1, 1);
         for (int row = 1; row < 9; row++){
