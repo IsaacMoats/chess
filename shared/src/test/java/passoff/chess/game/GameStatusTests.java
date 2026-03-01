@@ -6,7 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import passoff.chess.TestUtilities;
 
-public class GameStatusTests {
+public class    GameStatusTests {
     static final String INCORRECT_BLACK_CHECK = "Black is not in check but isInCheck returned true";
     static final String INCORRECT_WHITE_CHECK = "White is not in check but isInCheck returned true";
     static final String INCORRECT_BLACK_CHECKMATE = "Black is not in checkmate but isInCheckmate returned true";
