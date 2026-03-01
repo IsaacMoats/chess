@@ -4,10 +4,24 @@ package dataaccess;
  * Indicates there was an error connecting to the database
  */
 public class DataAccessException extends Exception{
-    public DataAccessException(String message) {
+    public Integer getCode() {
+        return code;
+    }
+
+    public DataAccessException(String message, int code) {
         super(message);
+        this.code = code;
     }
-    public DataAccessException(String message, Throwable ex) {
+    public DataAccessException(String message, Throwable ex, int code) {
         super(message, ex);
+        this.code = code;
     }
+    public enum Code {
+        ClientError,
+        ServerError,
+        AuthError,
+    }
+
+    final private Integer code;
 }
+
