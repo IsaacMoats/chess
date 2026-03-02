@@ -10,9 +10,11 @@ import io.javalin.http.Context;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import service.JoinGameRequest;
 import service.UserService;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class Server {
 
@@ -27,6 +29,7 @@ public class Server {
                 .post("/session", this::loginUser)
                 .delete("/session", this::logoutUser)
                 .post("/game", this::createGame)
+                .put("/game", this::joinGame)
                 .exception(DataAccessException.class, this::exceptionHandler);
 
         // Register your endpoints and exception handlers here.
@@ -83,9 +86,21 @@ public class Server {
                 throw new DataAccessException("Needs a game name!", 400);
             }
             Integer gameID = userService.createGame(gameName);
-            System.out.println("Name: " + gameName + "\n");
-            System.out.println(gameID);
             ctx.result("{\"gameID\":\"" + gameID + "\"}");
+        }
+    }
+
+    private void joinGame(Context ctx) throws DataAccessException{
+        String authToken = ctx.header("authorization");
+        if (userService.authenticate(authToken)){
+            JoinGameRequest game = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
+            if (!Objects.equals(game.playerColor(), "WHITE")) {
+                if (!Objects.equals(game.playerColor(), "BLACK")) {
+                    throw new DataAccessException("Choose white or black!", 400);
+                }
+            }
+            String user = userService.getUser(authToken);
+            userService.joinGame(user, game.playerColor(), game.gameID());
         }
     }
 }

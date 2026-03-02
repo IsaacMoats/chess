@@ -54,4 +54,12 @@ public class UserService {
             return true;
         }
     }
+
+    public String getUser(String authToken) {
+        return authDataAccess.getUser(authToken);
+    }
+
+    public void joinGame(String user, String color, Integer gameID) throws DataAccessException{
+        gameDataAccess.joinGame(user, color, gameID);
+    }
 }

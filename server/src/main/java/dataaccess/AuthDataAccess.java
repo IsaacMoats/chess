@@ -34,7 +34,8 @@ public class AuthDataAccess {
             authDataHash.remove(authToken);
         }
     }
-    public boolean authTokenExists(String authToken){
-        return authDataHash.containsValue(authToken);
+
+    public String getUser(String authToken){
+        return authDataHash.get(authToken).username();
     }
 }
