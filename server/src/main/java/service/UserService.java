@@ -36,6 +36,11 @@ public class UserService {
         ChessGame game = new ChessGame();
         return gameDataAccess.createGameData(null, null, gameName, game);
     }
+    public void clearGame(){
+        authDataAccess.deleteAuthData();
+        gameDataAccess.deleteGameData();
+        userDataAccess.deleteUserData();
+    }
 //    public void createGame(String authToken){
 //        String username = authDataAccess.getAuthData(authToken).username();
 //        HashMap<Integer, GameData> gameDataHash = authDataAccess.;

@@ -17,9 +17,7 @@ public class Server {
 
     private final Javalin javalin;
     private final UserService userService = new UserService();
-    private final UserDataAccess userDataAccess = new UserDataAccess();
-    private final AuthDataAccess authDataAccess = new AuthDataAccess();
-    private final GameDataAccess gameDataAccess = new GameDataAccess();
+
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::addUser)
@@ -50,14 +48,14 @@ public class Server {
     }
 
     private void clear(Context ctx){
-        userDataAccess.deleteUserData();
-        gameDataAccess.deleteGameData();
-        authDataAccess.deleteAuthData();
+        userService.clearGame();
     }
 
     private void addUser(Context ctx) throws DataAccessException{
         UserData userData = new Gson().fromJson(ctx.body(), UserData.class);
         ctx.result(new Gson().toJson(userService.addUser(userData)));
+        Map<String, String> headerMap = ctx.headerMap();
+        System.out.println(headerMap);
     }
 
     private void listGames(Context ctx){
@@ -67,8 +65,14 @@ public class Server {
 
     private void loginUser(Context ctx) throws DataAccessException{
         UserData userData = new Gson().fromJson(ctx.body(), UserData.class);
+        Map<String, String> headerMap = ctx.headerMap();
+        AuthData authedLogin = userService.loginUser(userData);
+//        ctx.header("authorization", authedLogin.authToken());
+        System.out.println(headerMap);
         System.out.println("Input Data: " + userData);
-        ctx.result(new Gson().toJson(userService.loginUser(userData)));
+        System.out.println("Result: " + new Gson().toJson(authedLogin));
+        ctx.status(200);
+        ctx.result(new Gson().toJson(authedLogin));
     }
 
     private void logoutUser(Context ctx) throws DataAccessException{
