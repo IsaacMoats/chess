@@ -17,35 +17,41 @@ public class UserService {
     private final UserDataAccess userDataAccess = new UserDataAccess();
     public final AuthDataAccess authDataAccess = new AuthDataAccess();
     private final GameDataAccess gameDataAccess = new GameDataAccess();
-    public AuthData addUser(UserData userData) throws DataAccessException{
+
+    public AuthData addUser(UserData userData) throws DataAccessException {
         userDataAccess.newUserData(userData.username(), userData.password(), userData.email());
         String authToken = AuthDataAccess.generateToken();
         authDataAccess.createAuthData(userData.username(), authToken);
         return authDataAccess.getAuthData(authToken);
     }
-    public AuthData loginUser(UserData userData) throws DataAccessException{
+
+    public AuthData loginUser(UserData userData) throws DataAccessException {
         userDataAccess.validateLogin(userData);
         String authToken = AuthDataAccess.generateToken();
         authDataAccess.createAuthData(userData.username(), authToken);
         return authDataAccess.getAuthData(authToken);
     }
+
     public void logoutUser(String authToken) throws DataAccessException {
         authDataAccess.deleteAuthToken(authToken);
     }
-    public Integer createGame(String gameName) {
+
+    public Integer createGame(GameData gameName) {
         ChessGame game = new ChessGame();
-        return gameDataAccess.createGameData(null, null, gameName, game);
+        return gameDataAccess.createGameData(null, null, gameName.gameName(), game);
     }
-    public void clearGame(){
+
+    public void clearGame() {
         authDataAccess.deleteAuthData();
         gameDataAccess.deleteGameData();
         userDataAccess.deleteUserData();
     }
-//    public void createGame(String authToken){
-//        String username = authDataAccess.getAuthData(authToken).username();
-//        HashMap<Integer, GameData> gameDataHash = authDataAccess.;
-//        for(){
-//            gameDataHash.containsValue()
-//        }
-//    }
+
+    public Boolean authenticate(String authToken) throws DataAccessException{
+        if (authDataAccess.getAuthData(authToken) == null){
+            throw new DataAccessException("Not authorized", 401);
+        } else {
+            return true;
+        }
+    }
 }
