@@ -5,7 +5,7 @@ import java.util.UUID;
 import java.util.HashMap;
 
 public class AuthDataAccess {
-    private HashMap<String, AuthData> authDataHash = new HashMap<>();
+    public HashMap<String, AuthData> authDataHash = new HashMap<>();
 
     public static String generateToken(){
         return UUID.randomUUID().toString();

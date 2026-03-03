@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class GameDataAccess {
-    private HashMap<Integer, GameData> gameDataHash = new HashMap<>();
+    public HashMap<Integer, GameData> gameDataHash = new HashMap<>();
     private int gameID = 1;
 
     public Integer createGameData(String whiteUsername, String blackUsername, String gameName, ChessGame game){

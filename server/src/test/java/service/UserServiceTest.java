@@ -102,15 +102,67 @@ public class UserServiceTest {
     }
 
     @Test
-    void clearGame() {
+    void clearGamePositive() throws DataAccessException {
+        UserData userData = new UserData("username", "password", "email");
+        userService.addUser(userData);
+        GameData gameName = new GameData(null,
+                null,
+                null,
+                "name",
+                null);
+        userService.createGame(gameName);
+        userService.clearGame();
+        assertEquals("{}", userService.authDataAccess.authDataHash.toString());
+        assertEquals("{}", userService.userDataAccess.users.toString());
+        assertEquals("{}", userService.gameDataAccess.gameDataHash.toString());
     }
 
 
     @Test
-    void joinGame() {
+    void joinGamePositive() throws DataAccessException {
+        GameData gameName = new GameData(null,
+                null,
+                null,
+                "name",
+                null);
+        userService.createGame(gameName);
+        UserData userData = new UserData("username", "password", "email");
+        userService.addUser(userData);
+
     }
 
     @Test
-    void listGames() {
+    void joinGameNegative() {
+
+    }
+
+    @Test
+    void listGamesPositive() {
+        GameData gameName = new GameData(null,
+                null,
+                null,
+                "name",
+                null);
+        userService.createGame(gameName);
+        assertEquals("[ListGameResponse[gameID=1, whiteUsername=null, blackUsername=null, gameName=name]]",
+                userService.listGames().toString());
+    }
+
+    @Test
+    void listGamesNegative() throws DataAccessException{
+        GameData gameName = new GameData(null,
+                null,
+                null,
+                "name",
+                null);
+        userService.createGame(gameName);
+        gameName = new GameData(null,
+                null,
+                null,
+                "name2",
+                null);
+        userService.createGame(gameName);
+        assertNotEquals("[ListGameResponse[gameID=1, whiteUsername=null, blackUsername=null, gameName=name]]",
+                userService.listGames().toString());
     }
 }

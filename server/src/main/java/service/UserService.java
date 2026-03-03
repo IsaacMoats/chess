@@ -15,9 +15,9 @@ import java.util.HashMap;
 
 // register
 public class UserService {
-    private final UserDataAccess userDataAccess = new UserDataAccess();
+    public final UserDataAccess userDataAccess = new UserDataAccess();
     public final AuthDataAccess authDataAccess = new AuthDataAccess();
-    private final GameDataAccess gameDataAccess = new GameDataAccess();
+    public final GameDataAccess gameDataAccess = new GameDataAccess();
 
     public AuthData addUser(UserData userData) throws DataAccessException {
         userDataAccess.newUserData(userData.username(), userData.password(), userData.email());
