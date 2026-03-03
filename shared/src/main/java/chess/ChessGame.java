@@ -219,13 +219,13 @@ public class ChessGame {
                 if(board.getPiece(checkPosition) != null && board.getPiece(checkPosition).getTeamColor() != teamColor){
                     // Gather possible moves and iterate through them
                     moves.addAll(board.getPiece(checkPosition).pieceMoves(this.board, checkPosition));
-                    for (ChessMove move : moves) {
-                        // If a move ends on where the king was, the king was in check
-                    if (move.getEndPosition().equals(kingPosition)) {
-                        return true;
-                    }
-                    }
                 }
+            }
+        }
+        for (ChessMove move : moves) {
+            // If a move ends on where the king was, the king was in check
+            if (move.getEndPosition().equals(kingPosition)) {
+                return true;
             }
         }
         // Place the king back on the board and return the base case
