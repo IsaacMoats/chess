@@ -2,7 +2,10 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.GameData;
+import service.ListGameResponse;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -43,5 +46,14 @@ public class GameDataAccess {
     // Idea: set fields to void
     public void deleteGameData(){
         gameDataHash = new HashMap<>();
+    }
+
+    public Collection<ListGameResponse> listGames() {
+        ArrayList<ListGameResponse> games = new ArrayList<>();
+        for (GameData gameData : gameDataHash.values()){
+            ListGameResponse game = new ListGameResponse(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName());
+            games.add(game);
+        }
+        return games;
     }
 }

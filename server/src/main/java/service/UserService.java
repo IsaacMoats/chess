@@ -10,6 +10,7 @@ import model.GameData;
 import model.UserData;
 
 import javax.xml.crypto.Data;
+import java.util.Collection;
 import java.util.HashMap;
 
 // register
@@ -61,5 +62,9 @@ public class UserService {
 
     public void joinGame(String user, String color, Integer gameID) throws DataAccessException{
         gameDataAccess.joinGame(user, color, gameID);
+    }
+
+    public Collection<ListGameResponse> listGames() {
+        return gameDataAccess.listGames();
     }
 }

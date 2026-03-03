@@ -63,8 +63,12 @@ public class Server {
     }
 
     private void listGames(Context ctx){
-        String authToken = new Gson().fromJson(ctx.body(), String.class);
-        ctx.result(authToken);
+        String authToken = ctx.header("authorization");
+        if (userService.listGames() == null){
+            ctx.result("");
+        } else {
+            ctx.result("{\"games\" : " + new Gson().toJson(userService.listGames()) + "}");
+        }
     }
 
     private void loginUser(Context ctx) throws DataAccessException{
