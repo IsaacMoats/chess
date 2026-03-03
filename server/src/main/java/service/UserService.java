@@ -37,7 +37,10 @@ public class UserService {
         authDataAccess.deleteAuthToken(authToken);
     }
 
-    public Integer createGame(GameData gameName) {
+    public Integer createGame(GameData gameName) throws DataAccessException{
+        if (gameName.gameName() == null) {
+            throw new DataAccessException("Needs a game name!", 400);
+        }
         ChessGame game = new ChessGame();
         return gameDataAccess.createGameData(null, null, gameName.gameName(), game);
     }

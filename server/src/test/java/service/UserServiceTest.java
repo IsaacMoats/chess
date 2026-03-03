@@ -80,7 +80,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void createGamePositive() {
+    void createGamePositive() throws DataAccessException{
         GameData gameName = new GameData(null,
                 null,
                 null,
@@ -128,16 +128,15 @@ public class UserServiceTest {
         userService.createGame(gameName);
         UserData userData = new UserData("username", "password", "email");
         userService.addUser(userData);
-
+        assertDoesNotThrow(
+                () -> userService.joinGame(userData.username(), "BLACK", 1),
+                "Does not throw"
+        );
     }
 
-    @Test
-    void joinGameNegative() {
-
-    }
 
     @Test
-    void listGamesPositive() {
+    void listGamesPositive() throws DataAccessException{
         GameData gameName = new GameData(null,
                 null,
                 null,

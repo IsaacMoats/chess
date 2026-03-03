@@ -88,9 +88,7 @@ public class Server {
         String authToken = ctx.header("authorization");
         if (userService.authenticate(authToken)) {
             GameData gameName = new Gson().fromJson(ctx.body(), GameData.class);
-            if (gameName.gameName() == null) {
-                throw new DataAccessException("Needs a game name!", 400);
-            }
+
             Integer gameID = userService.createGame(gameName);
             ctx.result("{\"gameID\":\"" + gameID + "\"}");
         }
