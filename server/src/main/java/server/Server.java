@@ -62,12 +62,14 @@ public class Server {
         System.out.println(headerMap);
     }
 
-    private void listGames(Context ctx){
+    private void listGames(Context ctx) throws DataAccessException {
         String authToken = ctx.header("authorization");
-        if (userService.listGames() == null){
-            ctx.result("");
-        } else {
-            ctx.result("{\"games\" : " + new Gson().toJson(userService.listGames()) + "}");
+        if (userService.authenticate(authToken)) {
+            if (userService.listGames() == null){
+                ctx.result("");
+            } else {
+                ctx.result("{\"games\" : " + new Gson().toJson(userService.listGames()) + "}");
+            }
         }
     }
 
