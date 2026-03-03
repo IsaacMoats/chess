@@ -221,9 +221,9 @@ public class ChessGame {
                     moves.addAll(board.getPiece(checkPosition).pieceMoves(this.board, checkPosition));
                     for (ChessMove move : moves) {
                         // If a move ends on where the king was, the king was in check
-                        if (move.getEndPosition().equals(kingPosition)) {
-                            return true;
-                        }
+                    if (move.getEndPosition().equals(kingPosition)) {
+                        return true;
+                    }
                     }
                 }
             }
@@ -242,9 +242,9 @@ public class ChessGame {
     public boolean isInCheckmate(TeamColor teamColor) {
         // Call valid moves and make if empty return true
         ArrayList <ChessMove> moves = new ArrayList<>();
-        for (int i = 1; i < 9; i++){
-            for (int j = 1; j < 9; j++){
-                ChessPosition position = new ChessPosition(i, j);
+        for (int outer = 1; outer < 9; outer++){
+            for (int inner = 1; inner < 9; inner++){
+                ChessPosition position = new ChessPosition(outer, inner);
                 if (board.getPiece(position) != null && board.getPiece(position).getTeamColor() == teamColor){
                     moves.addAll(validMoves(position));
                 }

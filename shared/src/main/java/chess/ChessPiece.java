@@ -80,8 +80,9 @@ public class ChessPiece {
         if (this.piece == PieceType.PAWN) {
             return calculateMoves.movePawn();
         }
-        if (this.piece == PieceType.KING)
+        if (this.piece == PieceType.KING) {
             return calculateMoves.moveKing();
+        }
         if (this.piece == PieceType.ROOK) {
             return calculateMoves.moveRook();
         }

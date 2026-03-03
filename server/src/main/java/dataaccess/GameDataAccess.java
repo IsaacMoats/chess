@@ -12,8 +12,7 @@ import java.util.Objects;
 public class GameDataAccess {
     private HashMap<Integer, GameData> gameDataHash = new HashMap<>();
     private int gameID = 1;
-    // Following CRUD operations
-    // Create
+
     public Integer createGameData(String whiteUsername, String blackUsername, String gameName, ChessGame game){
         GameData gameData = new GameData(this.gameID, whiteUsername, blackUsername, gameName, game);
         gameDataHash.put(this.gameID, gameData);
@@ -30,20 +29,25 @@ public class GameDataAccess {
             if (gameDataHash.get(gameID).blackUsername() != null){
                 throw new DataAccessException("Color already taken!", 403);
             }
-            GameData updatedGame = new GameData(gameID, gameDataHash.get(gameID).whiteUsername(), user, gameDataHash.get(gameID).gameName(), gameDataHash.get(gameID).game());
+            GameData updatedGame = new GameData(gameID,
+                    gameDataHash.get(gameID).whiteUsername(),
+                    user, gameDataHash.get(gameID).gameName(),
+                    gameDataHash.get(gameID).game());
             gameDataHash.replace(gameID, updatedGame);
         } else {
             if (gameDataHash.get(gameID).whiteUsername() != null){
                 throw new DataAccessException("Color already taken!", 403);
             }
-            GameData updatedGame = new GameData(gameID, user, gameDataHash.get(gameID).blackUsername(), gameDataHash.get(gameID).gameName(), gameDataHash.get(gameID).game());
+            GameData updatedGame = new GameData(gameID,
+                    user,
+                    gameDataHash.get(gameID).blackUsername(),
+                    gameDataHash.get(gameID).gameName(),
+                    gameDataHash.get(gameID).game());
             gameDataHash.replace(gameID, updatedGame);
         }
 
     }
-    // Read (get)
-    // Delete
-    // Idea: set fields to void
+
     public void deleteGameData(){
         gameDataHash = new HashMap<>();
     }
