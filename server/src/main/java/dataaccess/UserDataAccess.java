@@ -23,7 +23,6 @@ public class UserDataAccess {
 
     public void validateLogin(UserData userData) throws DataAccessException{
         UserData checkUserData = users.get(userData.username());
-        System.out.println("Database:" + checkUserData);
         if (userData.username() == null){
             throw new DataAccessException("No username given!", 400);
         } else if (userData.password() == null) {

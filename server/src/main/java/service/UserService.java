@@ -1,10 +1,7 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.AuthDataAccess;
-import dataaccess.DataAccessException;
-import dataaccess.GameDataAccess;
-import dataaccess.UserDataAccess;
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -15,7 +12,7 @@ import java.util.HashMap;
 
 // register
 public class UserService {
-    public final UserDataAccess userDataAccess = new UserDataAccess();
+    public final SQLUserDataAccess userDataAccess = new SQLUserDataAccess();
     public final AuthDataAccess authDataAccess = new AuthDataAccess();
     public final GameDataAccess gameDataAccess = new GameDataAccess();
 
