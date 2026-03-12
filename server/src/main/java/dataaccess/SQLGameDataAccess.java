@@ -69,10 +69,9 @@ public class SQLGameDataAccess {
                 );
                 preparedStatement.setInt(1, gameID);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    if (resultSet.next()) {
-                        if (resultSet.getString("blackUsername")  != null) {
-                            throw new DataAccessException("Color already taken!", 403);
-                        }
+                    if (resultSet.next() &&
+                            resultSet.getString("blackUsername")  != null) {
+                        throw new DataAccessException("Color already taken!", 403);
                     }
                 }
                 preparedStatement = conn.prepareStatement(
@@ -84,10 +83,8 @@ public class SQLGameDataAccess {
                 );
                 preparedStatement.setInt(1, gameID);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    if (resultSet.next()) {
-                        if (resultSet.getString("whiteUsername")  != null) {
-                            throw new DataAccessException("Color already taken!", 403);
-                        }
+                    if (resultSet.next() && resultSet.getString("whiteUsername")  != null) {
+                        throw new DataAccessException("Color already taken!", 403);
                     }
                 }
                 preparedStatement = conn.prepareStatement(
