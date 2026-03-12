@@ -41,7 +41,7 @@ public class SQLAuthDataAccess {
             preparedStatement.setString(2, authToken);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
     }
 
@@ -62,7 +62,7 @@ public class SQLAuthDataAccess {
 
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
         return authData;
     }
@@ -73,10 +73,10 @@ public class SQLAuthDataAccess {
             try {
                 preparedStatement.executeUpdate();
             } catch (SQLException e) {
-                throw new DataAccessException(e.getMessage(), 500);
+                throw new DataAccessException("Bad Connection", 500);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
     }
 
@@ -92,7 +92,7 @@ public class SQLAuthDataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
         try (Connection conn = DatabaseManager.getConnection()) {
             PreparedStatement preparedStatement = conn.prepareStatement(
@@ -101,7 +101,7 @@ public class SQLAuthDataAccess {
             preparedStatement.setString(1, authToken);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
     }
 
@@ -117,7 +117,7 @@ public class SQLAuthDataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
         return "hi";
     }

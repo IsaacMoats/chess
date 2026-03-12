@@ -29,6 +29,9 @@ public class SQLUserDataAccess{
     }
 
     public void storeUserPassword(String username, String password, String email) throws DataAccessException{
+        if (username == null || password == null) {
+            throw new DataAccessException("Bad Request", 400);
+        }
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         newUserData(username, hashedPassword, email);
     }
@@ -44,14 +47,18 @@ public class SQLUserDataAccess{
                 preparedStatement.setString(1, username);
                 preparedStatement.setString(2, password);
                 preparedStatement.setString(3, email);
-                preparedStatement.executeUpdate();
+                try {
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    throw new DataAccessException("Bad Connection", 500);
+                }
             } else if (usernameExists(username)) {
                 throw new DataAccessException("Username already taken!", 403);
             } else {
                 throw new DataAccessException("Bad Request", 400);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
 
     }
@@ -78,14 +85,14 @@ public class SQLUserDataAccess{
 
                 }
             } catch (SQLException e) {
-                throw new DataAccessException(e.getMessage(), e.getErrorCode());
+                throw new DataAccessException("Bad Connection", 500);
             }
             assert userDataDatabase != null;
             if (!BCrypt.checkpw(userData.password(), userDataDatabase.password())){
                 throw new DataAccessException("Wrong Password!", 401);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
     }
 
@@ -95,10 +102,10 @@ public class SQLUserDataAccess{
             try {
                 preparedStatement.executeUpdate();
             } catch (SQLException e) {
-                throw new DataAccessException(e.getMessage(), 500);
+                throw new DataAccessException("Bad Connection", 500);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
     }
 
@@ -111,7 +118,7 @@ public class SQLUserDataAccess{
                 return resultSet.next();
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
     }
 }

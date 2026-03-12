@@ -52,7 +52,7 @@ public class SQLGameDataAccess {
                 gameID = resultSet.getInt(1);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
         return gameID;
     }
@@ -98,7 +98,7 @@ public class SQLGameDataAccess {
             preparedStatement.setInt(2, gameID);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
     }
 
@@ -108,10 +108,10 @@ public class SQLGameDataAccess {
             try {
                 preparedStatement.executeUpdate();
             } catch (SQLException e) {
-                throw new DataAccessException(e.getMessage(), 500);
+                throw new DataAccessException("Bad Connection", 500);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
     }
 
@@ -133,10 +133,10 @@ public class SQLGameDataAccess {
                     games.add(gameResponse);
                 }
             } catch (SQLException e) {
-                throw new DataAccessException(e.getMessage(), 500);
+                throw new DataAccessException("Bad Connection", 500);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), 500);
+            throw new DataAccessException("Bad Connection", 500);
         }
         return games;
     }
