@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class UserService {
     public final SQLUserDataAccess userDataAccess = new SQLUserDataAccess();
     public final SQLAuthDataAccess authDataAccess = new SQLAuthDataAccess();
-    public final GameDataAccess gameDataAccess = new GameDataAccess();
+    public final SQLGameDataAccess gameDataAccess = new SQLGameDataAccess();
 
     public AuthData addUser(UserData userData) throws DataAccessException {
         userDataAccess.newUserData(userData.username(), userData.password(), userData.email());
@@ -64,7 +64,7 @@ public class UserService {
         gameDataAccess.joinGame(user, color, gameID);
     }
 
-    public Collection<ListGameResponse> listGames() {
+    public Collection<ListGameResponse> listGames() throws DataAccessException {
         return gameDataAccess.listGames();
     }
 }
