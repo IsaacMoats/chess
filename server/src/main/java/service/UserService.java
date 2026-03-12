@@ -17,7 +17,7 @@ public class UserService {
     public final SQLGameDataAccess gameDataAccess = new SQLGameDataAccess();
 
     public AuthData addUser(UserData userData) throws DataAccessException {
-        userDataAccess.newUserData(userData.username(), userData.password(), userData.email());
+        userDataAccess.storeUserPassword(userData.username(), userData.password(), userData.email());
         String authToken = SQLAuthDataAccess.generateToken();
         authDataAccess.createAuthData(userData.username(), authToken);
         return authDataAccess.getAuthData(authToken);

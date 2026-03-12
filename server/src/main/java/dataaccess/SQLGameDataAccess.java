@@ -52,7 +52,7 @@ public class SQLGameDataAccess {
                 gameID = resultSet.getInt(1);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
         return gameID;
     }
@@ -98,16 +98,20 @@ public class SQLGameDataAccess {
             preparedStatement.setInt(2, gameID);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
     }
 
     public void deleteGameData() throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             PreparedStatement preparedStatement = conn.prepareStatement("TRUNCATE TABLE gameData");
-            preparedStatement.executeUpdate();
+            try {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                throw new DataAccessException(e.getMessage(), 500);
+            }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
     }
 
@@ -128,9 +132,11 @@ public class SQLGameDataAccess {
                     ListGameResponse gameResponse = new ListGameResponse(gameID, whiteUsername, blackUsername, gameName);
                     games.add(gameResponse);
                 }
+            } catch (SQLException e) {
+                throw new DataAccessException(e.getMessage(), 500);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
         return games;
     }

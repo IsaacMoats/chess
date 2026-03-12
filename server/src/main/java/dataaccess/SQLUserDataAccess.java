@@ -2,6 +2,7 @@ package dataaccess;
 
 import model.UserData;
 import org.eclipse.jetty.server.Authentication;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 
@@ -27,7 +28,12 @@ public class SQLUserDataAccess{
         configureDatabase();
     }
 
-    public void newUserData(String username, String password, String email) throws DataAccessException {
+    public void storeUserPassword(String username, String password, String email) throws DataAccessException{
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        newUserData(username, hashedPassword, email);
+    }
+
+    private void newUserData(String username, String password, String email) throws DataAccessException {
         if (username == null || password == null || email == null) {
             throw new DataAccessException("Bad Request", 400);
         }
@@ -45,7 +51,7 @@ public class SQLUserDataAccess{
                 throw new DataAccessException("Bad Request", 400);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
 
     }
@@ -60,7 +66,7 @@ public class SQLUserDataAccess{
                 throw new DataAccessException("User not registered!", 401);
             }
             var preparedStatement = conn.prepareStatement(
-                    "SELECT username, password FROM userData WHERE username=?");
+                    "SELECT username, password, email FROM userData WHERE username=?");
             preparedStatement.setString(1, userData.username());
             UserData userDataDatabase = null;
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -75,20 +81,24 @@ public class SQLUserDataAccess{
                 throw new DataAccessException(e.getMessage(), e.getErrorCode());
             }
             assert userDataDatabase != null;
-            if (!userData.password().equals(userDataDatabase.password())){
+            if (!BCrypt.checkpw(userData.password(), userDataDatabase.password())){
                 throw new DataAccessException("Wrong Password!", 401);
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
     }
 
     public void deleteUserData() throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             PreparedStatement preparedStatement = conn.prepareStatement("TRUNCATE TABLE userData");
-            preparedStatement.executeUpdate();
+            try {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                throw new DataAccessException(e.getMessage(), 500);
+            }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
     }
 
@@ -101,7 +111,7 @@ public class SQLUserDataAccess{
                 return resultSet.next();
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
     }
 }

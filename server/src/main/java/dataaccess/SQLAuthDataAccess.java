@@ -41,7 +41,7 @@ public class SQLAuthDataAccess {
             preparedStatement.setString(2, authToken);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
     }
 
@@ -62,7 +62,7 @@ public class SQLAuthDataAccess {
 
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
         return authData;
     }
@@ -70,9 +70,13 @@ public class SQLAuthDataAccess {
     public void deleteAuthData() throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()) {
             PreparedStatement preparedStatement = conn.prepareStatement("TRUNCATE TABLE authData");
-            preparedStatement.executeUpdate();
+            try {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                throw new DataAccessException(e.getMessage(), 500);
+            }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
     }
 
@@ -88,7 +92,7 @@ public class SQLAuthDataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
         try (Connection conn = DatabaseManager.getConnection()) {
             PreparedStatement preparedStatement = conn.prepareStatement(
@@ -97,7 +101,7 @@ public class SQLAuthDataAccess {
             preparedStatement.setString(1, authToken);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
     }
 
@@ -113,7 +117,7 @@ public class SQLAuthDataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage(), e.getErrorCode());
+            throw new DataAccessException(e.getMessage(), 500);
         }
         return "hi";
     }
