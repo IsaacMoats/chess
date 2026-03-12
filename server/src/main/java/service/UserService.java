@@ -13,19 +13,19 @@ import java.util.HashMap;
 // register
 public class UserService {
     public final SQLUserDataAccess userDataAccess = new SQLUserDataAccess();
-    public final AuthDataAccess authDataAccess = new AuthDataAccess();
+    public final SQLAuthDataAccess authDataAccess = new SQLAuthDataAccess();
     public final GameDataAccess gameDataAccess = new GameDataAccess();
 
     public AuthData addUser(UserData userData) throws DataAccessException {
         userDataAccess.newUserData(userData.username(), userData.password(), userData.email());
-        String authToken = AuthDataAccess.generateToken();
+        String authToken = SQLAuthDataAccess.generateToken();
         authDataAccess.createAuthData(userData.username(), authToken);
         return authDataAccess.getAuthData(authToken);
     }
 
     public AuthData loginUser(UserData userData) throws DataAccessException {
         userDataAccess.validateLogin(userData);
-        String authToken = AuthDataAccess.generateToken();
+        String authToken = SQLAuthDataAccess.generateToken();
         authDataAccess.createAuthData(userData.username(), authToken);
         return authDataAccess.getAuthData(authToken);
     }
@@ -42,7 +42,7 @@ public class UserService {
         return gameDataAccess.createGameData(null, null, gameName.gameName(), game);
     }
 
-    public void clearGame() {
+    public void clearGame() throws DataAccessException {
         authDataAccess.deleteAuthData();
         gameDataAccess.deleteGameData();
         userDataAccess.deleteUserData();
@@ -56,7 +56,7 @@ public class UserService {
         }
     }
 
-    public String getUser(String authToken) {
+    public String getUser(String authToken) throws DataAccessException {
         return authDataAccess.getUser(authToken);
     }
 

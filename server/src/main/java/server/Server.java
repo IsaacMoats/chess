@@ -53,7 +53,7 @@ public class Server {
         ctx.json(body);
     }
 
-    private void clear(Context ctx){
+    private void clear(Context ctx) throws DataAccessException{
         userService.clearGame();
     }
 
