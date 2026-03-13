@@ -16,9 +16,15 @@ import java.util.Objects;
 public class Server {
 
     private final Javalin javalin;
-    private final UserService userService = new UserService();
+    private UserService userService = new UserService();
 
     public Server() {
+        try {
+            DatabaseManager.createDatabase();
+        } catch (DataAccessException ex) {
+            System.out.println("failed to create database");
+        }
+        userService = new UserService();
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::addUser)
                 .delete("/db", this::clear)
