@@ -32,6 +32,11 @@ public class SQLGameDataAccess {
 
     public SQLGameDataAccess(){
         configureDatabase();
+        try {
+            DatabaseManager.createDatabase();
+        } catch (DataAccessException ex) {
+            System.out.println("failed to create database");
+        }
     }
     public Integer createGameData(String whiteUsername, String blackUsername, String gameName, ChessGame game)
             throws DataAccessException {

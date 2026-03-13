@@ -26,6 +26,11 @@ public class SQLUserDataAccess{
 
     public SQLUserDataAccess(){
         configureDatabase();
+        try {
+            DatabaseManager.createDatabase();
+        } catch (DataAccessException ex) {
+            System.out.println("failed to create database");
+        }
     }
 
     public void storeUserPassword(String username, String password, String email) throws DataAccessException{

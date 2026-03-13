@@ -27,6 +27,11 @@ public class SQLAuthDataAccess {
 
     public SQLAuthDataAccess(){
         configureDatabase();
+        try {
+            DatabaseManager.createDatabase();
+        } catch (DataAccessException ex) {
+            System.out.println("failed to create database");
+        }
     }
 
     public static String generateToken(){
