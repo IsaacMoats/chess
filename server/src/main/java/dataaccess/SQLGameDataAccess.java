@@ -120,8 +120,6 @@ public class SQLGameDataAccess {
             );
             try (ResultSet resultSet = preparedStatement.executeQuery()){
                 while (resultSet.next()) {
-//                    String json = resultSet.getString("game");
-//                    ChessGame game = new Gson().fromJson(json, ChessGame.class);
                     Integer gameID = resultSet.getInt("gameID");
                     String whiteUsername = resultSet.getString("whiteUsername");
                     String blackUsername = resultSet.getString("blackUsername");

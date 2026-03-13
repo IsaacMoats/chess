@@ -16,6 +16,11 @@ public class DataAccessException extends Exception{
         super(message, ex);
         this.code = code;
     }
+
+    public int getStatusCode() {
+        return this.code;
+    }
+
     public enum Code {
         ClientError,
         ServerError,
