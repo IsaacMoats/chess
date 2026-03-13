@@ -67,14 +67,8 @@ public class UserDataAccessTests {
         assertEquals(400, ex.getStatusCode());
         assertEquals("Bad Request", ex.getMessage());
         try (Connection conn = DatabaseManager.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(
-                    "SELECT COUNT(*) AS cnt FROM userData"
-            );
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    assertEquals(0, rs.getInt("cnt"));
-                }
-            }
+            int total = countUsers();
+            assertEquals(0, total);
         } catch (SQLException e) {
             throw new DataAccessException("Bad Connection", 500);
         }
@@ -101,23 +95,10 @@ public class UserDataAccessTests {
         );
         assertEquals(401, ex.getStatusCode());
         assertEquals("Wrong Password!", ex.getMessage());
-        try (Connection conn = DatabaseManager.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(
-                    "SELECT username, password, email FROM userData WHERE username=?"
-            );
-            ps.setString(1, username);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    assertEquals("loginNeg", rs.getString("username"));
-                    assertEquals("loginNeg@example.com", rs.getString("email"));
-                    assertTrue(BCrypt.checkpw(password, rs.getString("password")));
-                } else {
-                    fail("Expected stored user not found");
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Bad Connection", 500);
-        }
+        DbUserRow row = selectUser(username);
+        assertUserRowEquals(row, "loginNeg", "loginNeg@example.com");
+        assertNotNull(row);
+        assertTrue(org.mindrot.jbcrypt.BCrypt.checkpw(password, row.hashedPassword));
     }
     @Test
     void usernameExistsPositive() throws DataAccessException {
@@ -166,16 +147,64 @@ public class UserDataAccessTests {
         userDataAccess.storeUserPassword("u2", "p2", "u2@example.com");
         userDataAccess.deleteUserData();
         try (Connection conn = DatabaseManager.getConnection()) {
+            int total = countUsers();
+            assertEquals(0, total);
+        } catch (SQLException e) {
+            throw new DataAccessException("Bad Connection", 500);
+        }
+    }
+
+    private static final class DbUserRow {
+        final String username;
+        final String hashedPassword;
+        final String email;
+
+        DbUserRow(String username, String hashedPassword, String email) {
+            this.username = username;
+            this.hashedPassword = hashedPassword;
+            this.email = email;
+        }
+    }
+
+    private DbUserRow selectUser(String username) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
             PreparedStatement ps = conn.prepareStatement(
-                    "SELECT COUNT(*) AS cnt FROM userData"
+                    "SELECT username, password, email FROM userData WHERE username=?"
             );
+            ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    assertEquals(0, rs.getInt("cnt"));
+                    return new DbUserRow(
+                            rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getString("email")
+                    );
                 }
+                return null;
             }
         } catch (SQLException e) {
             throw new DataAccessException("Bad Connection", 500);
         }
+    }
+
+    private int countUsers() throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) AS cnt FROM userData");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("cnt");
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Bad Connection", 500);
+        }
+    }
+
+
+    private void assertUserRowEquals(DbUserRow row, String expectedUsername, String expectedEmail) {
+        assertNotNull(row, "Expected a user row but found none");
+        assertEquals(expectedUsername, row.username);
+        assertEquals(expectedEmail, row.email);
     }
 }
