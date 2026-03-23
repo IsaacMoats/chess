@@ -64,7 +64,18 @@ public class ServerFacadeTests {
         assertEquals("player1", authData.username());
     }
 
+    @Test
+    public void loginUserNegative() throws DataAccessException {
+        UserData userData = new UserData("player1", "password", "email");
+        facade.addUser(userData);
+        UserData userData2 = new UserData("player2", "password2", "email2");
+        assertThrows(DataAccessException.class, () -> facade.loginUser(userData2));
+    }
 
+    @Test
+    public void logoutUserPositive() throws DataAccessException {
+
+    }
 
 //    @Test
 //    public void clearDatabase() throws DataAccessException {
