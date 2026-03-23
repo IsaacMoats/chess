@@ -1,7 +1,7 @@
 package dataaccess;
 
+import exception.DataAccessException;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;

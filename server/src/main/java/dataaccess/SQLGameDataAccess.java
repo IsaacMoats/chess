@@ -1,7 +1,7 @@
 package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
-import passoff.exception.ResponseParseException;
+import exception.DataAccessException;
 import service.ListGameResponse;
 
 import java.sql.*;

@@ -1,5 +1,6 @@
 package dataaccess;
 
+import exception.DataAccessException;
 import model.AuthData;
 import java.util.UUID;
 import java.util.HashMap;
@@ -24,7 +25,7 @@ public class AuthDataAccess {
         authDataHash = new HashMap<>();
     }
 
-    public void deleteAuthToken(String authToken) throws DataAccessException{
+    public void deleteAuthToken(String authToken) throws DataAccessException {
         if (!authDataHash.containsKey(authToken)) {
             throw new DataAccessException("User is not logged in", 401);
         } else {

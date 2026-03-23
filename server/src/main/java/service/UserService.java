@@ -2,13 +2,12 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.*;
+import exception.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 
-import javax.xml.crypto.Data;
 import java.util.Collection;
-import java.util.HashMap;
 
 // register
 public class UserService {

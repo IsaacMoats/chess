@@ -1,4 +1,5 @@
 package dataaccess;
+import exception.DataAccessException;
 import model.UserData;
 
 import java.util.HashMap;
@@ -7,7 +8,7 @@ import java.util.Objects;
 public class UserDataAccess {
     public HashMap<String, UserData> users = new HashMap<>();
 
-    public void newUserData(String username, String password, String email) throws DataAccessException{
+    public void newUserData(String username, String password, String email) throws DataAccessException {
         if (username == null || password == null || email == null) {
             throw new DataAccessException("Bad Request", 400);
         }

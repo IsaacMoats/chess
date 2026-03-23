@@ -1,7 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
+import exception.DataAccessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
