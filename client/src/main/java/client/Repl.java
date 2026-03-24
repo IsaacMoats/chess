@@ -1,15 +1,15 @@
 package client;
 
 import exception.DataAccessException;
+import model.UserData;
 import server.ServerFacade;
+import ui.EscapeSequences;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
-
-import static java.awt.Color.BLUE;
+import static ui.EscapeSequences.*;
 import static java.awt.Color.GREEN;
-import static jdk.javadoc.internal.html.HtmlAttr.InputType.RESET;
 
 public class Repl {
     private final ServerFacade server;
@@ -26,11 +26,11 @@ public class Repl {
         Scanner scanner = new Scanner(System.in);
         String result = "";
         while (!result.equals("Q")) {
-            System.out.println("\n" + RESET + ">>>" + GREEN);
+            System.out.println("\n >>>");
             String line = scanner.nextLine();
             try {
                 result = eval(line);
-                System.out.println(BLUE + result);
+                System.out.println(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e) {
                 String msg = e.toString();
                 System.out.println(msg);
@@ -39,21 +39,32 @@ public class Repl {
         System.out.println();
     }
 
+    public String registerUser(String... params) throws DataAccessException {
+        if (params.length >= 3) {
+            state = "signed in";
+            UserData userData = new UserData(params[0], params[1], params[2]);
+            server.addUser(userData);
+            return "Welcome " + params[0] +". You have registered successfully and logged in";
+        }
+        throw new DataAccessException("Expected: <Username> <Password> <email>", 400);
+    }
+
     public String eval(String input) {
         try {
             String[] tokens = input.toUpperCase().split(" ");
             String cmd = tokens[0];
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-//                case "S" -> signIn(params);
-//                case "R" -> registerUser(params);
+                case "S" -> "sign in";
+                case "R" -> registerUser(params);
                 case "Q" -> "Quit";
-//                case "C" -> createGame(params);
-//                case "L" -> listGames();
-//                case "J" -> joinGame(params);
-//                case "C" -> clearGame();
+                case "C" -> "createGame(params);";
+                case "L" -> "listGames();";
+                case "J" -> "joinGame(params);";
+                case "D" -> "clearGame();";
+                default -> throw new IllegalStateException("Unexpected value: " + cmd);
             };
-        } catch (DataAccessException ex) {
+        } catch (Throwable ex) {
             return ex.getMessage();
         }
     }
@@ -70,7 +81,7 @@ public class Repl {
                     - (C)reate game <Game name>
                     - (L)ist games
                     - (J)oin game <Game ID> <Color>
-                    - (C)lear all games
+                    - (D)elete all games
                     - (Q)uit
                     """;
         }
