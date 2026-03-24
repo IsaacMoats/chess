@@ -3,6 +3,7 @@ package server;
 import exception.DataAccessException;
 import com.google.gson.Gson;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
 import javax.xml.crypto.Data;
@@ -21,28 +22,42 @@ public class ServerFacade {
     }
 
     public AuthData addUser (UserData userData) throws DataAccessException {
-        HttpRequest request = buildRequest("POST", "/user",userData);
+        HttpRequest request = buildRequest("POST", "/user",userData, null);
         var response = sendRequest(request);
         return handleResponse(response, AuthData.class);
     }
 
     public AuthData loginUser(UserData userData) throws DataAccessException {
-        HttpRequest request = buildRequest("POST", "/session", userData);
+        HttpRequest request = buildRequest("POST", "/session", userData, null);
         var response = sendRequest(request);
         return handleResponse(response, AuthData.class);
     }
 
     public void clear() throws DataAccessException {
-        HttpRequest request = buildRequest("DELETE", "/db", null);
+        HttpRequest request = buildRequest("DELETE", "/db", null, null);
         sendRequest(request);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    public GameData createGame(GameData gameData, String authToken) throws DataAccessException {
+        HttpRequest request = buildRequest("POST", "/game", gameData, authToken);
+        var response = sendRequest(request);
+        return handleResponse(response, GameData.class);
+    }
+
+    public void logoutUser(String authToken) throws DataAccessException{
+        HttpRequest request = buildRequest("DELETE", "/session", null, authToken);
+        sendRequest(request);
+    }
+
+    private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverURL + path))
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
+            if (authToken != null) {
+                request.setHeader("authorization", authToken);
+            }
         }
         return request.build();
     }

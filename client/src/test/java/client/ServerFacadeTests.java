@@ -1,7 +1,9 @@
 package client;
 
+import chess.ChessGame;
 import exception.DataAccessException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -13,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ServerFacadeTests {
 
     private static Server server;
-    static ServerFacade facade;
+     static ServerFacade facade;
 
     @BeforeAll
     public static void init() {
@@ -74,7 +76,45 @@ public class ServerFacadeTests {
 
     @Test
     public void logoutUserPositive() throws DataAccessException {
+        UserData userData = new UserData("player1", "password", "email");
+        facade.addUser(userData);
+        AuthData authData = facade.loginUser(userData);
+        String authToken = authData.authToken();
+        assertDoesNotThrow(() -> facade.logoutUser(authToken));
+    }
 
+    @Test
+    public void logoutUserNegative() throws DataAccessException {
+        UserData userData = new UserData("player1", "password", "email");
+        facade.addUser(userData);
+        AuthData authData = facade.loginUser(userData);
+        String authToken = authData.authToken();
+        facade.logoutUser(authToken);
+        assertThrows(DataAccessException.class, () -> facade.logoutUser(authToken));
+    }
+
+    @Test
+    public void createGamePositive() throws DataAccessException {
+        UserData userData = new UserData("player1", "password", "email");
+        facade.addUser(userData);
+        AuthData authData = facade.loginUser(userData);
+        String authToken = authData.authToken();
+        ChessGame game = new ChessGame();
+        GameData gameData = new GameData(1, null, null, "gameOne", game);
+        GameData gameDataReturn = facade.createGame(gameData, authToken);
+        assertEquals(gameData.gameID(), gameDataReturn.gameID());
+    }
+
+    @Test
+    public void createGameNegative() throws DataAccessException {
+        UserData userData = new UserData("player1", "password", "email");
+        facade.addUser(userData);
+        AuthData authData = facade.loginUser(userData);
+        String authToken = authData.authToken();
+        facade.logoutUser(authToken);
+        ChessGame game = new ChessGame();
+        GameData gameData = new GameData(1, null, null, "gameOne", game);
+        assertThrows(DataAccessException.class, () -> facade.createGame(gameData, "badToken"));
     }
 
 //    @Test
