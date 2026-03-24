@@ -5,6 +5,7 @@ import dataaccess.*;
 import exception.DataAccessException;
 import model.AuthData;
 import model.GameData;
+import model.ListGameResponse;
 import model.UserData;
 
 import java.util.Collection;

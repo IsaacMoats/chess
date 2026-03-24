@@ -4,6 +4,7 @@ import exception.DataAccessException;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
+import model.ListGameResponse;
 import model.UserData;
 
 import javax.xml.crypto.Data;
@@ -12,6 +13,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Collection;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -49,15 +51,26 @@ public class ServerFacade {
         sendRequest(request);
     }
 
+    public void joinGame(GameData gameData, String authToken) throws DataAccessException {
+        HttpRequest request = buildRequest("PUT", "/game", gameData, authToken);
+        sendRequest(request);
+    }
+
+    public Collection<ListGameResponse> listGames(String authToken) throws DataAccessException {
+        HttpRequest request = buildRequest("GET", "/game", null, authToken);
+        var response = sendRequest(request);
+        return handleResponse(response, Collection.class);
+    }
+
     private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverURL + path))
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
-            if (authToken != null) {
-                request.setHeader("authorization", authToken);
-            }
+        }
+        if (authToken != null) {
+            request.setHeader("authorization", authToken);
         }
         return request.build();
     }

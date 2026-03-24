@@ -117,6 +117,38 @@ public class ServerFacadeTests {
         assertThrows(DataAccessException.class, () -> facade.createGame(gameData, "badToken"));
     }
 
+    @Test
+    public void joinGamePositive() throws DataAccessException {
+        UserData userData = new UserData("player1", "password", "email");
+        facade.addUser(userData);
+        AuthData authData = facade.loginUser(userData);
+        String authToken = authData.authToken();
+        ChessGame game = new ChessGame();
+        GameData gameData = new GameData(1, null, null, "gameOne", game);
+        assertDoesNotThrow(()->facade.joinGame(gameData, authToken));
+    }
+
+    @Test void joinGameNegative() throws DataAccessException {
+        UserData userData = new UserData("player1", "password", "email");
+        facade.addUser(userData);
+        AuthData authData = facade.loginUser(userData);
+        String authToken = "badAuth";
+        ChessGame game = new ChessGame();
+        GameData gameData = new GameData(1, null, null, "gameOne", game);
+        assertThrows(DataAccessException.class, ()-> facade.joinGame(gameData, authToken));
+    }
+
+    @Test void listGames() throws DataAccessException {
+        ChessGame game1 = new ChessGame();
+        GameData gameData1 = new GameData(1, null, null, "game1", game1);
+        ChessGame game2 = new ChessGame();
+        GameData gameData2 = new GameData(2, null, null, "game2", game2);
+        UserData userData = new UserData("player1", "password", "email");
+        facade.addUser(userData);
+        AuthData authData = facade.loginUser(userData);
+        String authToken = authData.authToken();
+        facade.listGames(authToken);
+    }
 //    @Test
 //    public void clearDatabase() throws DataAccessException {
 //        UserData userData = new UserData("player1", "password", "email");
