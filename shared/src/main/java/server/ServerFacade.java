@@ -18,6 +18,7 @@ import java.util.Collection;
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverURL;
+    private String authToken;
 
     public ServerFacade(String url) {
         serverURL = url;
@@ -32,7 +33,10 @@ public class ServerFacade {
     public AuthData loginUser(UserData userData) throws DataAccessException {
         HttpRequest request = buildRequest("POST", "/session", userData, null);
         var response = sendRequest(request);
-        return handleResponse(response, AuthData.class);
+        AuthData authData = handleResponse(response, AuthData.class);
+        assert authData != null;
+        authToken = authData.authToken();
+        return authData;
     }
 
     public void clear() throws DataAccessException {
@@ -40,13 +44,13 @@ public class ServerFacade {
         sendRequest(request);
     }
 
-    public GameData createGame(GameData gameData, String authToken) throws DataAccessException {
+    public GameData createGame(GameData gameData) throws DataAccessException {
         HttpRequest request = buildRequest("POST", "/game", gameData, authToken);
         var response = sendRequest(request);
         return handleResponse(response, GameData.class);
     }
 
-    public void logoutUser(String authToken) throws DataAccessException{
+    public void logoutUser() throws DataAccessException{
         HttpRequest request = buildRequest("DELETE", "/session", null, authToken);
         sendRequest(request);
     }

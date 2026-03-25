@@ -1,6 +1,7 @@
 package client;
 
 import exception.DataAccessException;
+import model.GameData;
 import model.UserData;
 import server.ServerFacade;
 import ui.EscapeSequences;
@@ -59,6 +60,21 @@ public class Repl {
         throw new DataAccessException("Expected: <Username> <Password", 400);
     }
 
+    public String createGame(String... params) throws DataAccessException {
+        if (params.length >= 1) {
+            GameData gameData = new GameData(null, null, null, params[0], null);
+            try {
+                server.createGame(gameData);
+                return params[0] + " game created successfully.";
+            } catch (DataAccessException ex) {
+                return "Not logged in! Must log in to create game";
+            }
+        }
+        throw new DataAccessException("Expected: <Game name>", 400);
+    }
+
+    public
+
     public String eval(String input) {
         try {
             String[] tokens = input.toUpperCase().split(" ");
@@ -68,8 +84,9 @@ public class Repl {
                 case "S" -> signIn(params);
                 case "R" -> registerUser(params);
                 case "Q" -> "Quit";
-                case "C" -> "createGame(params);";
-                case "L" -> "listGames();";
+                case "C" -> createGame(params);
+                case "L" -> logout(params);
+                case "Li" -> "listGames();";
                 case "J" -> "joinGame(params);";
                 case "D" -> "clearGame();";
                 case "H" -> help();
@@ -91,7 +108,8 @@ public class Repl {
         } else {
             return """
                     - (C)reate game <Game name>
-                    - (L)ist games
+                    - (L)ogout
+                    - (Li)st games
                     - (J)oin game <Game ID> <Color>
                     - (D)elete all games
                     - (Q)uit

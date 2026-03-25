@@ -79,18 +79,15 @@ public class ServerFacadeTests {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
         AuthData authData = facade.loginUser(userData);
-        String authToken = authData.authToken();
-        assertDoesNotThrow(() -> facade.logoutUser(authToken));
+        assertDoesNotThrow(() -> facade.logoutUser());
     }
 
     @Test
     public void logoutUserNegative() throws DataAccessException {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
-        AuthData authData = facade.loginUser(userData);
-        String authToken = authData.authToken();
-        facade.logoutUser(authToken);
-        assertThrows(DataAccessException.class, () -> facade.logoutUser(authToken));
+        facade.logoutUser();
+        assertThrows(DataAccessException.class, () -> facade.logoutUser());
     }
 
     @Test
@@ -101,7 +98,7 @@ public class ServerFacadeTests {
         String authToken = authData.authToken();
         ChessGame game = new ChessGame();
         GameData gameData = new GameData(1, null, null, "gameOne", game);
-        GameData gameDataReturn = facade.createGame(gameData, authToken);
+        GameData gameDataReturn = facade.createGame(gameData);
         assertEquals(gameData.gameID(), gameDataReturn.gameID());
     }
 
@@ -109,12 +106,10 @@ public class ServerFacadeTests {
     public void createGameNegative() throws DataAccessException {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
-        AuthData authData = facade.loginUser(userData);
-        String authToken = authData.authToken();
-        facade.logoutUser(authToken);
+        facade.logoutUser();
         ChessGame game = new ChessGame();
         GameData gameData = new GameData(1, null, null, "gameOne", game);
-        assertThrows(DataAccessException.class, () -> facade.createGame(gameData, "badToken"));
+        assertThrows(DataAccessException.class, () -> facade.createGame(gameData));
     }
 
     @Test
