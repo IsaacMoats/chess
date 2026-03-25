@@ -110,54 +110,46 @@ public class Repl {
             return printable;
     }
 
-    private String printBoard(ChessBoard board, int startingRow, int endingRow, int startingCol, int endingCol) {
+    private String printBoard(ChessBoard board, int i, int j) {
         String printable = "";
-        printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
-        for (int i = 1; i < 9; i++){
-            printable = printable.concat(RESET_BG_COLOR + i);
-            for (int j = 1; j < 9; j++){
-                ChessPosition position = new ChessPosition(i, j);
-                ChessPiece piece = board.getPiece(position);
-                if (((i%2) != 0 && (j%2)!=0) || ((i%2) == 0 && (j%2) == 0)) {
-                    printable = printable.concat(SET_BG_COLOR_WHITE);
-                } else  {
-                    printable = printable.concat(SET_BG_COLOR_BLACK);
-                }
-                if (piece == null) {
-                    printable = printable.concat(EMPTY);
-                } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-                        printable = printable.concat(WHITE_KING);
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
-                        printable = printable.concat(WHITE_ROOK);
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
-                        printable = printable.concat(WHITE_BISHOP);
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
-                        printable = printable.concat(WHITE_QUEEN);
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
-                        printable = printable.concat(WHITE_KNIGHT);
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-                        printable = printable.concat(WHITE_PAWN);
-                    }
-                } else {
-                    if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-                        printable = printable.concat(BLACK_KING);
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
-                        printable = printable.concat(BLACK_ROOK);
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
-                        printable = printable.concat(BLACK_BISHOP);
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
-                        printable = printable.concat(BLACK_QUEEN);
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
-                        printable = printable.concat(BLACK_KNIGHT);
-                    } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-                        printable = printable.concat(BLACK_PAWN);
-                    }
-                }
-            }
-            printable = printable.concat(RESET_BG_COLOR + i + "\n");
+        ChessPosition position = new ChessPosition(i, j);
+        ChessPiece piece = board.getPiece(position);
+        if (((i%2) != 0 && (j%2)!=0) || ((i%2) == 0 && (j%2) == 0)) {
+            printable = printable.concat(SET_BG_COLOR_BLACK);
+        } else  {
+            printable = printable.concat(SET_BG_COLOR_WHITE);
         }
-        printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+        if (piece == null) {
+            printable = printable.concat(EMPTY);
+        } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+                printable = printable.concat(WHITE_KING);
+            } else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
+                printable = printable.concat(WHITE_ROOK);
+            } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
+                printable = printable.concat(WHITE_BISHOP);
+            } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
+                printable = printable.concat(WHITE_QUEEN);
+            } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
+                printable = printable.concat(WHITE_KNIGHT);
+            } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                printable = printable.concat(WHITE_PAWN);
+            }
+        } else {
+            if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+                printable = printable.concat(BLACK_KING);
+            } else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
+                printable = printable.concat(BLACK_ROOK);
+            } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
+                printable = printable.concat(BLACK_BISHOP);
+            } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
+                printable = printable.concat(BLACK_QUEEN);
+            } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
+                printable = printable.concat(BLACK_KNIGHT);
+            } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                printable = printable.concat(BLACK_PAWN);
+            }
+        }
         return printable;
     }
 
@@ -165,14 +157,32 @@ public class Repl {
         int gameID = Integer.parseInt(params[0]);
         JoinGameRequest joinGameRequest = new JoinGameRequest(params[1], gameID);
         ChessGame game = server.joinGame(joinGameRequest);
+        String printable = "";
         ChessBoard board = game.getBoard();
         //For black
         if (Objects.equals(params[1], "BLACK")) {
-            return printBoard(board, 1, 9, 1, 9);
-        } else {
-            return printBoard(board, 9, 1, )
+            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+            for (int i = 1; i < 9; i++){
+                printable = printable.concat(RESET_BG_COLOR + i);
+                for(int j = 8; j > 0; j--){
+                    printable = printable.concat(printBoard(board, i, j));
+                }
+                printable = printable.concat(RESET_BG_COLOR + i + "\n");
+            }
+            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+        } else if (Objects.equals(params[1], "WHITE")){
+            printable = printable.concat(RESET_BG_COLOR + "\s\sA\s\sB\s\sC\s\sD\s\sE\s\sF\s\sG\s\sH\n");
+            for (int i = 8; i > 0; i--){
+                printable = printable.concat(RESET_BG_COLOR + i);
+                for (int j = 1; j < 9; j++) {
+                    printable = printable.concat(printBoard(board, i, j));
+                }
+                printable = printable.concat(RESET_BG_COLOR + i + "\n");
+            }
+            printable = printable.concat(RESET_BG_COLOR + "\s\sA\s\sB\s\sC\s\sD\s\sE\s\sF\s\sG\s\sH\n");
         }
 
+        return printable;
 
     }
 
@@ -181,6 +191,8 @@ public class Repl {
         state = "signed out";
         return "Game cleared! All ";
     }
+
+    public String watch(params) thro
 
     public String eval(String input) {
         try {
@@ -197,6 +209,7 @@ public class Repl {
                 case "J" -> joinGame(params);
                 case "D" -> clearGame();
                 case "H" -> help();
+                case "W" -> watch(params);
                 default -> throw new IllegalStateException("Unexpected value: " + cmd);
             };
         } catch (Throwable ex) {
@@ -218,6 +231,7 @@ public class Repl {
                     - (L)ogout
                     - (Li)st games
                     - (J)oin game <Game ID> <Color>
+                    - (W)atch game <Game ID>
                     - (D)elete all games
                     - (Q)uit
                     - (H)elp
