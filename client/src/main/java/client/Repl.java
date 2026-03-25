@@ -26,7 +26,7 @@ public class Repl {
         Scanner scanner = new Scanner(System.in);
         String result = "";
         while (!result.equals("Q")) {
-            System.out.println("\n >>>");
+            System.out.println("\n >>> ");
             String line = scanner.nextLine();
             try {
                 result = eval(line);
@@ -44,9 +44,19 @@ public class Repl {
             state = "signed in";
             UserData userData = new UserData(params[0], params[1], params[2]);
             server.addUser(userData);
-            return "Welcome " + params[0] +". You have registered successfully and logged in";
+            return "Welcome " + params[0] +". You have registered successfully and logged in.";
         }
         throw new DataAccessException("Expected: <Username> <Password> <email>", 400);
+    }
+
+    public String signIn(String... params) throws DataAccessException {
+        if (params.length >= 2) {
+            state = "signed in";
+            UserData userData = new UserData(params[0], params[1], "email");
+            server.loginUser(userData);
+            return "Welcome back " + params[0] +". You have successfully logged in.";
+        }
+        throw new DataAccessException("Expected: <Username> <Password", 400);
     }
 
     public String eval(String input) {
@@ -55,13 +65,14 @@ public class Repl {
             String cmd = tokens[0];
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "S" -> "sign in";
+                case "S" -> signIn(params);
                 case "R" -> registerUser(params);
                 case "Q" -> "Quit";
                 case "C" -> "createGame(params);";
                 case "L" -> "listGames();";
                 case "J" -> "joinGame(params);";
                 case "D" -> "clearGame();";
+                case "H" -> help();
                 default -> throw new IllegalStateException("Unexpected value: " + cmd);
             };
         } catch (Throwable ex) {
@@ -75,6 +86,7 @@ public class Repl {
                     - (S)ign In <Username> <Password>
                     - (R)egister <Username> <Password> <email>
                     - (Q)uit
+                    - (H)elp
                     """;
         } else {
             return """
@@ -83,6 +95,7 @@ public class Repl {
                     - (J)oin game <Game ID> <Color>
                     - (D)elete all games
                     - (Q)uit
+                    - (H)elp
                     """;
         }
     }
