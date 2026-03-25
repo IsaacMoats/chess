@@ -7,7 +7,6 @@ import model.GameData;
 import model.ListGameResponse;
 import model.UserData;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -18,20 +17,20 @@ import java.util.Collection;
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverURL;
-    private String authToken;
+    public String authToken;
 
     public ServerFacade(String url) {
         serverURL = url;
     }
 
     public AuthData addUser (UserData userData) throws DataAccessException {
-        HttpRequest request = buildRequest("POST", "/user",userData, null);
+        HttpRequest request = buildRequest("POST", "/user",userData);
         var response = sendRequest(request);
         return handleResponse(response, AuthData.class);
     }
 
     public AuthData loginUser(UserData userData) throws DataAccessException {
-        HttpRequest request = buildRequest("POST", "/session", userData, null);
+        HttpRequest request = buildRequest("POST", "/session", userData);
         var response = sendRequest(request);
         AuthData authData = handleResponse(response, AuthData.class);
         assert authData != null;
@@ -40,33 +39,33 @@ public class ServerFacade {
     }
 
     public void clear() throws DataAccessException {
-        HttpRequest request = buildRequest("DELETE", "/db", null, null);
+        HttpRequest request = buildRequest("DELETE", "/db", null);
         sendRequest(request);
     }
 
     public GameData createGame(GameData gameData) throws DataAccessException {
-        HttpRequest request = buildRequest("POST", "/game", gameData, authToken);
+        HttpRequest request = buildRequest("POST", "/game", gameData);
         var response = sendRequest(request);
         return handleResponse(response, GameData.class);
     }
 
     public void logoutUser() throws DataAccessException{
-        HttpRequest request = buildRequest("DELETE", "/session", null, authToken);
+        HttpRequest request = buildRequest("DELETE", "/session", null);
         sendRequest(request);
     }
 
-    public void joinGame(GameData gameData, String authToken) throws DataAccessException {
-        HttpRequest request = buildRequest("PUT", "/game", gameData, authToken);
+    public void joinGame(GameData gameData) throws DataAccessException {
+        HttpRequest request = buildRequest("PUT", "/game", gameData);
         sendRequest(request);
     }
 
-    public Collection<ListGameResponse> listGames(String authToken) throws DataAccessException {
-        HttpRequest request = buildRequest("GET", "/game", null, authToken);
+    public Collection<ListGameResponse> listGames() throws DataAccessException {
+        HttpRequest request = buildRequest("GET", "/game", null);
         var response = sendRequest(request);
         return handleResponse(response, Collection.class);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
+    private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverURL + path))
                 .method(method, makeRequestBody(body));

@@ -86,6 +86,7 @@ public class ServerFacadeTests {
     public void logoutUserNegative() throws DataAccessException {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
+        facade.authToken = "bad auth";
         facade.logoutUser();
         assertThrows(DataAccessException.class, () -> facade.logoutUser());
     }
@@ -116,21 +117,18 @@ public class ServerFacadeTests {
     public void joinGamePositive() throws DataAccessException {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
-        AuthData authData = facade.loginUser(userData);
-        String authToken = authData.authToken();
         ChessGame game = new ChessGame();
         GameData gameData = new GameData(1, null, null, "gameOne", game);
-        assertDoesNotThrow(()->facade.joinGame(gameData, authToken));
+        assertDoesNotThrow(()->facade.joinGame(gameData));
     }
 
     @Test void joinGameNegative() throws DataAccessException {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
-        AuthData authData = facade.loginUser(userData);
-        String authToken = "badAuth";
         ChessGame game = new ChessGame();
         GameData gameData = new GameData(1, null, null, "gameOne", game);
-        assertThrows(DataAccessException.class, ()-> facade.joinGame(gameData, authToken));
+        facade.authToken = "bad token";
+        assertThrows(DataAccessException.class, ()-> facade.joinGame(gameData));
     }
 
     @Test void listGames() throws DataAccessException {
@@ -142,7 +140,7 @@ public class ServerFacadeTests {
         facade.addUser(userData);
         AuthData authData = facade.loginUser(userData);
         String authToken = authData.authToken();
-        facade.listGames(authToken);
+        facade.listGames();
     }
 //    @Test
 //    public void clearDatabase() throws DataAccessException {

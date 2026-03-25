@@ -52,9 +52,9 @@ public class Repl {
 
     public String signIn(String... params) throws DataAccessException {
         if (params.length >= 2) {
-            state = "signed in";
             UserData userData = new UserData(params[0], params[1], "email");
             server.loginUser(userData);
+            state = "signed in";
             return "Welcome back " + params[0] +". You have successfully logged in.";
         }
         throw new DataAccessException("Expected: <Username> <Password", 400);
@@ -73,7 +73,23 @@ public class Repl {
         throw new DataAccessException("Expected: <Game name>", 400);
     }
 
-    public
+    public String logout() throws DataAccessException {
+
+        state = "signed out";
+        server.logoutUser();
+        return "Successfully logged out.";
+    }
+
+    public String listGames() throws DataAccessException {
+        return server.listGames().toString();
+    }
+
+    public String joinGame(String... params) throws DataAccessException {
+        int gameID = Integer.parseInt(params[0]);
+        GameData gameData = new GameData(gameID, null, null, null, null);
+        server.joinGame(gameData);
+        return "joined";
+    }
 
     public String eval(String input) {
         try {
@@ -85,8 +101,8 @@ public class Repl {
                 case "R" -> registerUser(params);
                 case "Q" -> "Quit";
                 case "C" -> createGame(params);
-                case "L" -> logout(params);
-                case "Li" -> "listGames();";
+                case "L" -> logout();
+                case "LI" -> listGames();
                 case "J" -> "joinGame(params);";
                 case "D" -> "clearGame();";
                 case "H" -> help();
