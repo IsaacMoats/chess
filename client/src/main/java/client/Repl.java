@@ -167,20 +167,26 @@ public class Repl {
                 printable = printable.concat(RESET_BG_COLOR + i + "\n");
             }
             printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
-        } else if (Objects.equals(params[1], "WHITE")){
-            printable = printable.concat(RESET_BG_COLOR + "\s\sA\s\sB\s\sC\s\sD\s\sE\s\sF\s\sG\s\sH\n");
-            for (int i = 8; i > 0; i--){
-                printable = printable.concat(RESET_BG_COLOR + i);
-                for (int j = 1; j < 9; j++) {
-                    printable = printable.concat(printBoard(board, i, j));
-                }
-                printable = printable.concat(RESET_BG_COLOR + i + "\n");
-            }
-            printable = printable.concat(RESET_BG_COLOR + "\s\sA\s\sB\s\sC\s\sD\s\sE\s\sF\s\sG\s\sH\n");
+        } else if (Objects.equals(params[1], "WHITE")) {
+            printable = printable.concat(printWhiteOnly(board));
         }
 
         return printable;
 
+    }
+
+    private String printWhiteOnly(ChessBoard board) {
+        String printable = "";
+        printable = printable.concat(RESET_BG_COLOR + "\s\sA\s\sB\s\sC\s\sD\s\sE\s\sF\s\sG\s\sH\n");
+        for (int i = 8; i > 0; i--) {
+            printable = printable.concat(RESET_BG_COLOR + i);
+            for (int j = 1; j < 9; j++) {
+                printable = printable.concat(printBoard(board, i, j));
+            }
+            printable = printable.concat(RESET_BG_COLOR + i + "\n");
+        }
+        printable = printable.concat(RESET_BG_COLOR + "\s\sA\s\sB\s\sC\s\sD\s\sE\s\sF\s\sG\s\sH\n");
+        return printable;
     }
 
     public String clearGame() throws DataAccessException {
@@ -191,18 +197,9 @@ public class Repl {
 
     public String watch(String... params) {
         int gameID = Integer.parseInt(params[0]);
-        ChessBoard board = new ChessBoard();
-        String printable = "";
-        printable = printable.concat(RESET_BG_COLOR + "\s\sA\s\sB\s\sC\s\sD\s\sE\s\sF\s\sG\s\sH\n");
-        for (int i = 8; i > 0; i--){
-            printable = printable.concat(RESET_BG_COLOR + i);
-            for (int j = 1; j < 9; j++) {
-                printable = printable.concat(printBoard(board, i, j));
-            }
-            printable = printable.concat(RESET_BG_COLOR + i + "\n");
-        }
-        printable = printable.concat(RESET_BG_COLOR + "\s\sA\s\sB\s\sC\s\sD\s\sE\s\sF\s\sG\s\sH\n");
-        return printable;
+        ChessGame game = new ChessGame();
+        ChessBoard board = game.getBoard();
+        return printWhiteOnly(board);
     }
 
     public String eval(String input) {
