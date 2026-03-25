@@ -51,6 +51,7 @@ public class ServerFacade {
 
     public void logoutUser() throws DataAccessException{
         HttpRequest request = buildRequest("DELETE", "/session", null);
+        authToken = null;
         sendRequest(request);
     }
 
@@ -90,7 +91,7 @@ public class ServerFacade {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
-            throw new DataAccessException("bad1", 400);
+            throw new DataAccessException(e.getMessage(), 400);
         }
     }
 
@@ -99,7 +100,8 @@ public class ServerFacade {
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                throw new DataAccessException ("bad2", 400);
+                model.HttpResponse HttpResponse = new Gson().fromJson(body, model.HttpResponse.class);
+                throw new DataAccessException (HttpResponse.message(), 400);
             }
 
             throw new DataAccessException("bad3", 400);

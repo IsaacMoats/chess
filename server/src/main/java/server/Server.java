@@ -8,7 +8,7 @@ import io.javalin.http.Context;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import service.JoinGameRequest;
+import model.JoinGameRequest;
 import service.UserService;
 
 import java.util.Map;
