@@ -2,11 +2,9 @@ package server;
 
 import exception.DataAccessException;
 import com.google.gson.Gson;
-import model.AuthData;
-import model.GameData;
-import model.ListGameResponse;
-import model.UserData;
+import model.*;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -51,19 +49,19 @@ public class ServerFacade {
 
     public void logoutUser() throws DataAccessException{
         HttpRequest request = buildRequest("DELETE", "/session", null);
+        sendRequest(request);
         authToken = null;
+    }
+
+    public void joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
+        HttpRequest request = buildRequest("PUT", "/game", joinGameRequest);
         sendRequest(request);
     }
 
-    public void joinGame(GameData gameData) throws DataAccessException {
-        HttpRequest request = buildRequest("PUT", "/game", gameData);
-        sendRequest(request);
-    }
-
-    public Collection<ListGameResponse> listGames() throws DataAccessException {
+    public ListOfGamesResponse listGames() throws DataAccessException {
         HttpRequest request = buildRequest("GET", "/game", null);
         var response = sendRequest(request);
-        return handleResponse(response, Collection.class);
+        return handleResponse(response, ListOfGamesResponse.class);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body) {

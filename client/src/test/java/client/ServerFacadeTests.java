@@ -4,6 +4,7 @@ import chess.ChessGame;
 import exception.DataAccessException;
 import model.AuthData;
 import model.GameData;
+import model.JoinGameRequest;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -86,7 +87,7 @@ public class ServerFacadeTests {
     public void logoutUserNegative() throws DataAccessException {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
-        facade.authToken = "bad auth";
+//        facade.authToken = "bad auth";
         facade.logoutUser();
         assertThrows(DataAccessException.class, () -> facade.logoutUser());
     }
@@ -117,30 +118,30 @@ public class ServerFacadeTests {
     public void joinGamePositive() throws DataAccessException {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
-        ChessGame game = new ChessGame();
-        GameData gameData = new GameData(1, null, null, "gameOne", game);
-        assertDoesNotThrow(()->facade.joinGame(gameData));
+        JoinGameRequest joinGameRequest = new JoinGameRequest("WHITE", 1);
+        assertDoesNotThrow(()->facade.joinGame(joinGameRequest));
     }
 
     @Test void joinGameNegative() throws DataAccessException {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
-        ChessGame game = new ChessGame();
-        GameData gameData = new GameData(1, null, null, "gameOne", game);
+        JoinGameRequest joinGameRequest = new JoinGameRequest("WHITE", 1);
         facade.authToken = "bad token";
-        assertThrows(DataAccessException.class, ()-> facade.joinGame(gameData));
+        assertThrows(DataAccessException.class, ()-> facade.joinGame(joinGameRequest));
     }
 
-    @Test void listGames() throws DataAccessException {
+    @Test void listGamesPositive() throws DataAccessException {
         ChessGame game1 = new ChessGame();
         GameData gameData1 = new GameData(1, null, null, "game1", game1);
         ChessGame game2 = new ChessGame();
         GameData gameData2 = new GameData(2, null, null, "game2", game2);
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
-        AuthData authData = facade.loginUser(userData);
-        String authToken = authData.authToken();
-        facade.listGames();
+        facade.loginUser(userData);
+        facade.createGame(gameData1);
+        facade.createGame(gameData2);
+        System.out.println(facade.listGames());
+
     }
 //    @Test
 //    public void clearDatabase() throws DataAccessException {

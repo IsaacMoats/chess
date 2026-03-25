@@ -2,6 +2,8 @@ package client;
 
 import exception.DataAccessException;
 import model.GameData;
+import model.JoinGameRequest;
+import model.ListGameResponse;
 import model.UserData;
 import server.ServerFacade;
 import ui.EscapeSequences;
@@ -45,6 +47,7 @@ public class Repl {
             state = "signed in";
             UserData userData = new UserData(params[0], params[1], params[2]);
             server.addUser(userData);
+            server.loginUser(userData);
             return "Welcome " + params[0] +". You have registered successfully and logged in.";
         }
         throw new DataAccessException("Expected: <Username> <Password> <email>", 400);
@@ -81,13 +84,29 @@ public class Repl {
     }
 
     public String listGames() throws DataAccessException {
-        return server.listGames().toString();
+        var games = server.listGames();
+        String printable = "";
+        for (ListGameResponse gameResponse : games.games()) {
+            printable = printable.concat("Name: " + gameResponse.gameName());
+            if (gameResponse.whiteUsername() == null) {
+                printable = printable.concat("\tWhite Player: No player entered yet!");
+            } else {
+                printable = printable.concat("\tWhite Player: " + gameResponse.whiteUsername());
+            }
+            if (gameResponse.blackUsername() == null) {
+                printable = printable.concat("\tBlack Player: No player entered yet!");
+            } else {
+                printable = printable.concat("\tBlack Player: " + gameResponse.blackUsername());
+            }
+            printable = printable.concat("\tGameID: " + gameResponse.gameID() + "\n");
+        }
+            return printable;
     }
 
     public String joinGame(String... params) throws DataAccessException {
         int gameID = Integer.parseInt(params[0]);
-        GameData gameData = new GameData(gameID, null, null, null, null);
-        server.joinGame(gameData);
+        JoinGameRequest joinGameRequest = new JoinGameRequest(params[1], gameID);
+        server.joinGame(joinGameRequest);
         return "joined";
     }
 
