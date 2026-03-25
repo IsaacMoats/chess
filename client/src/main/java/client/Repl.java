@@ -100,6 +100,9 @@ public class Repl {
             }
             printable = printable.concat("\tGameID: " + gameResponse.gameID() + "\n");
         }
+        if (Objects.equals(printable, "")) {
+            return "No games yet!";
+        }
             return printable;
     }
 
