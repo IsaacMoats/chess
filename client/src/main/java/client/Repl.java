@@ -193,7 +193,19 @@ public class Repl {
     }
 
     public String watch(String... params) {
-        return "params";
+        int gameID = Integer.parseInt(params[0]);
+        ChessBoard board = new ChessBoard();
+        String printable = "";
+        printable = printable.concat(RESET_BG_COLOR + "\s\sA\s\sB\s\sC\s\sD\s\sE\s\sF\s\sG\s\sH\n");
+        for (int i = 8; i > 0; i--){
+            printable = printable.concat(RESET_BG_COLOR + i);
+            for (int j = 1; j < 9; j++) {
+                printable = printable.concat(printBoard(board, i, j));
+            }
+            printable = printable.concat(RESET_BG_COLOR + i + "\n");
+        }
+        printable = printable.concat(RESET_BG_COLOR + "\s\sA\s\sB\s\sC\s\sD\s\sE\s\sF\s\sG\s\sH\n");
+        return printable;
     }
 
     public String eval(String input) {
