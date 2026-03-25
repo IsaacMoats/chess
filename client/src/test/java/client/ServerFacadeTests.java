@@ -2,13 +2,12 @@ package client;
 
 import chess.ChessGame;
 import exception.DataAccessException;
-import model.AuthData;
-import model.GameData;
-import model.JoinGameRequest;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
+
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -87,7 +86,7 @@ public class ServerFacadeTests {
     public void logoutUserNegative() throws DataAccessException {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
-//        facade.authToken = "bad auth";
+        facade.authToken = "bad auth";
         facade.logoutUser();
         assertThrows(DataAccessException.class, () -> facade.logoutUser());
     }
@@ -125,7 +124,8 @@ public class ServerFacadeTests {
         assertDoesNotThrow(()->facade.joinGame(joinGameRequest));
     }
 
-    @Test void joinGameNegative() throws DataAccessException {
+    @Test
+    void joinGameNegative() throws DataAccessException {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
         JoinGameRequest joinGameRequest = new JoinGameRequest("WHITE", 1);
@@ -133,7 +133,8 @@ public class ServerFacadeTests {
         assertThrows(DataAccessException.class, ()-> facade.joinGame(joinGameRequest));
     }
 
-    @Test void listGamesPositive() throws DataAccessException {
+    @Test
+    void listGamesPositive() throws DataAccessException {
         ChessGame game1 = new ChessGame();
         GameData gameData1 = new GameData(1, null, null, "game1", game1);
         ChessGame game2 = new ChessGame();
@@ -143,8 +144,18 @@ public class ServerFacadeTests {
         facade.loginUser(userData);
         facade.createGame(gameData1);
         facade.createGame(gameData2);
-        System.out.println(facade.listGames());
-
+        ListOfGamesResponse listOfGamesResponse = facade.listGames();
+        Collection<ListGameResponse> listGameResponse = listOfGamesResponse.games();
+        assertEquals(2, listGameResponse.size());
     }
 
+    @Test
+    void listGameNegative() throws DataAccessException {
+        UserData userData = new UserData("player1", "password", "email");
+        facade.addUser(userData);
+        facade.loginUser(userData);
+        ChessGame game = new ChessGame();
+        GameData gameData = new GameData(null, null, null, null, game);
+        assertDoesNotThrow(()->facade.listGames());
+    }
 }
