@@ -9,14 +9,11 @@ import model.GameData;
 import model.JoinGameRequest;
 import model.ListGameResponse;
 import model.UserData;
-import server.ServerFacade;
-import ui.EscapeSequences;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
-import static java.awt.Color.GREEN;
 
 public class Repl {
     private final ServerFacade server;
