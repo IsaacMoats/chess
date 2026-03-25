@@ -192,7 +192,9 @@ public class Repl {
         return "Game cleared! All ";
     }
 
-    public String watch(params) thro
+    public String watch(String... params) {
+        return "params";
+    }
 
     public String eval(String input) {
         try {
