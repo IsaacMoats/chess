@@ -22,7 +22,7 @@ public class GameDataAccess {
         return oldGameID;
     }
 
-    public void joinGame(String user, String color, Integer gameID) throws DataAccessException {
+    public ChessGame joinGame(String user, String color, Integer gameID) throws DataAccessException {
         if (gameID == null) {
             throw new DataAccessException("No gameID given!", 400);
         }
@@ -35,6 +35,7 @@ public class GameDataAccess {
                     user, gameDataHash.get(gameID).gameName(),
                     gameDataHash.get(gameID).game());
             gameDataHash.replace(gameID, updatedGame);
+            return updatedGame.game();
         } else {
             if (gameDataHash.get(gameID).whiteUsername() != null){
                 throw new DataAccessException("Color already taken!", 403);
@@ -45,6 +46,7 @@ public class GameDataAccess {
                     gameDataHash.get(gameID).gameName(),
                     gameDataHash.get(gameID).game());
             gameDataHash.replace(gameID, updatedGame);
+            return updatedGame.game();
         }
 
     }

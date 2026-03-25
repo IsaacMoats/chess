@@ -1,5 +1,9 @@
 package client;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import exception.DataAccessException;
 import model.GameData;
 import model.JoinGameRequest;
@@ -106,11 +110,76 @@ public class Repl {
             return printable;
     }
 
+    private String printBoard(ChessBoard board, int startingRow, int endingRow, int startingCol, int endingCol) {
+        String printable = "";
+        printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+        for (int i = 1; i < 9; i++){
+            printable = printable.concat(RESET_BG_COLOR + i);
+            for (int j = 1; j < 9; j++){
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                if (((i%2) != 0 && (j%2)!=0) || ((i%2) == 0 && (j%2) == 0)) {
+                    printable = printable.concat(SET_BG_COLOR_WHITE);
+                } else  {
+                    printable = printable.concat(SET_BG_COLOR_BLACK);
+                }
+                if (piece == null) {
+                    printable = printable.concat(EMPTY);
+                } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                    if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+                        printable = printable.concat(WHITE_KING);
+                    } else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
+                        printable = printable.concat(WHITE_ROOK);
+                    } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
+                        printable = printable.concat(WHITE_BISHOP);
+                    } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
+                        printable = printable.concat(WHITE_QUEEN);
+                    } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
+                        printable = printable.concat(WHITE_KNIGHT);
+                    } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                        printable = printable.concat(WHITE_PAWN);
+                    }
+                } else {
+                    if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+                        printable = printable.concat(BLACK_KING);
+                    } else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
+                        printable = printable.concat(BLACK_ROOK);
+                    } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
+                        printable = printable.concat(BLACK_BISHOP);
+                    } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
+                        printable = printable.concat(BLACK_QUEEN);
+                    } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
+                        printable = printable.concat(BLACK_KNIGHT);
+                    } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                        printable = printable.concat(BLACK_PAWN);
+                    }
+                }
+            }
+            printable = printable.concat(RESET_BG_COLOR + i + "\n");
+        }
+        printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+        return printable;
+    }
+
     public String joinGame(String... params) throws DataAccessException {
         int gameID = Integer.parseInt(params[0]);
         JoinGameRequest joinGameRequest = new JoinGameRequest(params[1], gameID);
-        server.joinGame(joinGameRequest);
-        return "joined";
+        ChessGame game = server.joinGame(joinGameRequest);
+        ChessBoard board = game.getBoard();
+        //For black
+        if (Objects.equals(params[1], "BLACK")) {
+            return printBoard(board, 1, 9, 1, 9);
+        } else {
+            return printBoard(board, 9, 1, )
+        }
+
+
+    }
+
+    public String clearGame() throws DataAccessException {
+        server.clear();
+        state = "signed out";
+        return "Game cleared! All ";
     }
 
     public String eval(String input) {
@@ -125,8 +194,8 @@ public class Repl {
                 case "C" -> createGame(params);
                 case "L" -> logout();
                 case "LI" -> listGames();
-                case "J" -> "joinGame(params);";
-                case "D" -> "clearGame();";
+                case "J" -> joinGame(params);
+                case "D" -> clearGame();
                 case "H" -> help();
                 default -> throw new IllegalStateException("Unexpected value: " + cmd);
             };

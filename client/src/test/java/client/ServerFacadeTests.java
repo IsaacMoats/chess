@@ -118,6 +118,9 @@ public class ServerFacadeTests {
     public void joinGamePositive() throws DataAccessException {
         UserData userData = new UserData("player1", "password", "email");
         facade.addUser(userData);
+        facade.loginUser(userData);
+        GameData gameData = new GameData(1, null, null, "gameOne", null);
+        facade.createGame(gameData);
         JoinGameRequest joinGameRequest = new JoinGameRequest("WHITE", 1);
         assertDoesNotThrow(()->facade.joinGame(joinGameRequest));
     }
@@ -143,12 +146,5 @@ public class ServerFacadeTests {
         System.out.println(facade.listGames());
 
     }
-//    @Test
-//    public void clearDatabase() throws DataAccessException {
-//        UserData userData = new UserData("player1", "password", "email");
-//        facade.addUser(userData);
-//        facade.clear();
-//        assertThrows(DataAccessException.class, () ->)
-//    }
 
 }

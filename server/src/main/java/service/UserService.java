@@ -60,8 +60,8 @@ public class UserService {
         return authDataAccess.getUser(authToken);
     }
 
-    public void joinGame(String user, String color, Integer gameID) throws DataAccessException{
-        gameDataAccess.joinGame(user, color, gameID);
+    public GameData joinGame(String user, String color, Integer gameID) throws DataAccessException{
+        return gameDataAccess.joinGame(user, color, gameID);
     }
 
     public Collection<ListGameResponse> listGames() throws DataAccessException {

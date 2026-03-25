@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.*;
 import exception.DataAccessException;
@@ -108,7 +109,9 @@ public class Server {
                 }
             }
             String user = userService.getUser(authToken);
-            userService.joinGame(user, game.playerColor(), game.gameID());
+            GameData gameData = userService.joinGame(user, game.playerColor(), game.gameID());
+            String gameString = new Gson().toJson(gameData.game());
+            ctx.result(gameString);
         }
     }
 }

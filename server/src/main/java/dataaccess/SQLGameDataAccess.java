@@ -2,6 +2,7 @@ package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.DataAccessException;
+import model.GameData;
 import model.ListGameResponse;
 
 import java.sql.*;
@@ -62,7 +63,8 @@ public class SQLGameDataAccess {
         return gameID;
     }
 
-    public void joinGame(String user, String color, Integer gameID) throws DataAccessException {
+    public GameData joinGame(String user, String color, Integer gameID) throws DataAccessException {
+        GameData gameData = null;
         if (gameID == null) {
             throw new DataAccessException("No gameID given!", 400);
         }
@@ -102,6 +104,25 @@ public class SQLGameDataAccess {
         } catch (SQLException e) {
             throw new DataAccessException("Bad Connection", 500);
         }
+        try (Connection conn = DatabaseManager.getConnection()) {
+            PreparedStatement preparedStatement = null;
+            preparedStatement = conn.prepareStatement("SELECT * FROM gameData WHERE gameID=?");
+            preparedStatement.setInt(1, gameID);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    ChessGame game = new Gson().fromJson(resultSet.getString("game"), ChessGame.class);
+                    gameData = new GameData(resultSet.getInt("gameID"),
+                            resultSet.getString("whiteUsername"),
+                            resultSet.getString("blackUsername"),
+                            resultSet.getString("gameName"),
+                            game);
+                    return gameData;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Bad Connection", 500);
+        }
+        return gameData;
     }
 
     public void deleteGameData() throws DataAccessException {

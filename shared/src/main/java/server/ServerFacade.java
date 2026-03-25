@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import exception.DataAccessException;
 import com.google.gson.Gson;
 import model.*;
@@ -10,7 +11,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Collection;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -53,9 +53,10 @@ public class ServerFacade {
         authToken = null;
     }
 
-    public void joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
+    public ChessGame joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
         HttpRequest request = buildRequest("PUT", "/game", joinGameRequest);
-        sendRequest(request);
+        var response = sendRequest(request);
+        return handleResponse(response, ChessGame.class);
     }
 
     public ListOfGamesResponse listGames() throws DataAccessException {
