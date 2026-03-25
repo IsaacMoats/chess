@@ -5,7 +5,6 @@ import exception.DataAccessException;
 import com.google.gson.Gson;
 import model.*;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -99,8 +98,8 @@ public class ServerFacade {
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                model.HttpResponse HttpResponse = new Gson().fromJson(body, model.HttpResponse.class);
-                throw new DataAccessException (HttpResponse.message(), 400);
+                model.HttpResponse httpResponse = new Gson().fromJson(body, model.HttpResponse.class);
+                throw new DataAccessException (httpResponse.message(), 400);
             }
 
             throw new DataAccessException("bad3", 400);
