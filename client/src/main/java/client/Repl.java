@@ -18,6 +18,7 @@ import static ui.EscapeSequences.*;
 public class Repl {
     private final ServerFacade server;
     private String state = "signed out";
+    private int gameTotal = 0;
 
     public Repl(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
@@ -29,7 +30,7 @@ public class Repl {
 
         Scanner scanner = new Scanner(System.in);
         String result = "";
-        while (!result.equals("Q")) {
+        while (!result.equals("QUIT")) {
             System.out.println("\n >>> ");
             String line = scanner.nextLine();
             try {
@@ -55,13 +56,14 @@ public class Repl {
     }
 
     public String signIn(String... params) throws DataAccessException {
-        if (params.length >= 2) {
+        if (params.length == 2) {
             UserData userData = new UserData(params[0], params[1], "email");
             server.loginUser(userData);
             state = "signed in";
             return "Welcome back " + params[0] +". You have successfully logged in.";
+        } else {
+            throw new DataAccessException("Expected: <Username> <Password>", 400);
         }
-        throw new DataAccessException("Expected: <Username> <Password", 400);
     }
 
     public String createGame(String... params) throws DataAccessException {
@@ -69,6 +71,7 @@ public class Repl {
             GameData gameData = new GameData(null, null, null, params[0], null);
             try {
                 server.createGame(gameData);
+                gameTotal += 1;
                 return params[0] + " game created successfully.";
             } catch (DataAccessException ex) {
                 return "Not logged in! Must log in to create game";
@@ -78,13 +81,18 @@ public class Repl {
     }
 
     public String logout() throws DataAccessException {
-
-        state = "signed out";
+        if (!Objects.equals(state, "signed in")) {
+            return "Must be logged in to log out!";
+        }
         server.logoutUser();
+        state = "signed out";
         return "Successfully logged out.";
     }
 
     public String listGames() throws DataAccessException {
+        if (!Objects.equals(state, "signed in")) {
+            return "Must be logged in to list games!";
+        }
         var games = server.listGames();
         String printable = "";
         for (ListGameResponse gameResponse : games.games()) {
@@ -151,7 +159,21 @@ public class Repl {
     }
 
     public String joinGame(String... params) throws DataAccessException {
+        if (params.length != 1) {
+            return "Input the number of the game to join.";
+        }
+        if (!Objects.equals(state, "signed in")) {
+            return "Must be logged in to join games!";
+        }
+        try {
+            Integer.parseInt(params[0]);
+        } catch (NumberFormatException e){
+            return "Please input a valid number (1, 2, 3 ...) for the game to join";
+        }
         int gameID = Integer.parseInt(params[0]);
+        if (gameID < 0 || gameID > gameTotal) {
+            return "Choose a valid game from the list!";
+        }
         JoinGameRequest joinGameRequest = new JoinGameRequest(params[1], gameID);
         ChessGame game = server.joinGame(joinGameRequest);
         String printable = "";
@@ -196,7 +218,21 @@ public class Repl {
     }
 
     public String watch(String... params) {
+        if (params.length != 1) {
+            return "Input the number of a game to watch.";
+        }
+        if (!Objects.equals(state, "signed in")) {
+            return "Must be logged in to watch games!";
+        }
+        try {
+            Integer.parseInt(params[0]);
+        } catch (NumberFormatException e){
+            return "Please input a valid number (1, 2, 3 ...) for the game to watch";
+        }
         int gameID = Integer.parseInt(params[0]);
+        if (gameID < 0 || gameID > gameTotal) {
+            return "Choose a valid game from the list!";
+        }
         ChessGame game = new ChessGame();
         ChessBoard board = game.getBoard();
         return printWhiteOnly(board);
@@ -208,17 +244,17 @@ public class Repl {
             String cmd = tokens[0];
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "S" -> signIn(params);
-                case "R" -> registerUser(params);
-                case "Q" -> "Quit";
-                case "C" -> createGame(params);
-                case "L" -> logout();
-                case "LI" -> listGames();
-                case "J" -> joinGame(params);
-                case "D" -> clearGame();
-                case "H" -> help();
-                case "W" -> watch(params);
-                default -> throw new IllegalStateException("Unexpected value: " + cmd);
+                case "LOGIN" -> signIn(params);
+                case "REGISTER" -> registerUser(params);
+                case "QUIT" -> "QUIT";
+                case "CREATE" -> createGame(params);
+                case "LOGOUT" -> logout();
+                case "LIST" -> listGames();
+                case "JOIN" -> joinGame(params);
+//                case "D" -> clearGame();
+                case "HELP" -> help();
+                case "WATCH" -> watch(params);
+                default -> throw new IllegalStateException("Not on options list: " + cmd);
             };
         } catch (Throwable ex) {
             return ex.getMessage();
@@ -228,21 +264,20 @@ public class Repl {
     public String help(){
         if (Objects.equals(state, "signed out")) {
             return """
-                    - (S)ign In <Username> <Password>
-                    - (R)egister <Username> <Password> <email>
-                    - (Q)uit
-                    - (H)elp
+                    - Login <Username> <Password>
+                    - Register <Username> <Password> <email>
+                    - Quit
+                    - Help
                     """;
         } else {
             return """
-                    - (C)reate game <Game name>
-                    - (L)ogout
-                    - (Li)st games
-                    - (J)oin game <Game ID> <Color>
-                    - (W)atch game <Game ID>
-                    - (D)elete all games
-                    - (Q)uit
-                    - (H)elp
+                    - Create <Game name>
+                    - Logout
+                    - (List) games
+                    - Join <Game ID> <Color>
+                    - Watch <Game ID>
+                    - Quit
+                    - Help
                     """;
         }
     }
