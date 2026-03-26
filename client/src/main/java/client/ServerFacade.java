@@ -64,6 +64,10 @@ public class ServerFacade {
         return handleResponse(response, ListOfGamesResponse.class);
     }
 
+    public String watchGame() {
+        return "WatchGame";
+    }
+
     private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverURL + path))

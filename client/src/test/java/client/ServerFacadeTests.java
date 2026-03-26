@@ -158,4 +158,18 @@ public class ServerFacadeTests {
         GameData gameData = new GameData(null, null, null, null, game);
         assertDoesNotThrow(()->facade.listGames());
     }
+
+    @Test
+    void watchGamePositive() throws DataAccessException {
+        ChessGame game1 = new ChessGame();
+        GameData gameData1 = new GameData(1, null, null, "game1", game1);
+        ChessGame game2 = new ChessGame();
+        GameData gameData2 = new GameData(2, null, null, "game2", game2);
+        UserData userData = new UserData("player1", "password", "email");
+        facade.addUser(userData);
+        facade.loginUser(userData);
+        facade.createGame(gameData1);
+        facade.createGame(gameData2);
+        assertDoesNotThrow(()->facade.watchGame());
+    }
 }
