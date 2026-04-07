@@ -10,6 +10,7 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 import model.JoinGameRequest;
+import server.websocket.WebSocketHandler;
 import service.UserService;
 
 import java.util.Map;
@@ -27,6 +28,7 @@ public class Server {
             System.out.println("failed to create database");
         }
         userService = new UserService();
+        server.websocket.WebSocketHandler webSocketHandler = new WebSocketHandler();
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::addUser)
                 .delete("/db", this::clear)
@@ -35,6 +37,11 @@ public class Server {
                 .delete("/session", this::logoutUser)
                 .post("/game", this::createGame)
                 .put("/game", this::joinGame)
+                .ws("/ws", ws->{
+                    ws.onConnect(webSocketHandler);
+                    ws.onMessage(webSocketHandler);
+                    ws.onClose(webSocketHandler);
+                })
                 .exception(DataAccessException.class, this::exceptionHandler);
 
         // Register your endpoints and exception handlers here.
