@@ -95,6 +95,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
 
     public void makeMove(WsContext ctx, MakeMoveCommand makeMoveCommand) throws IOException, SQLException, DataAccessException {
+        ChessGame.TeamColor opponent = null;
         try {
             if (!authDataID(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), ctx)) {
                return;
@@ -109,6 +110,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String white = gameDataAccess.getGameData(makeMoveCommand.getGameID()).whiteUsername();
             String black = gameDataAccess.getGameData(makeMoveCommand.getGameID()).blackUsername();
             String username = authDataAccess.getUser(makeMoveCommand.getAuthToken());
+            if (Objects.equals(username, white)) {
+                opponent = ChessGame.TeamColor.BLACK;
+            } else if (Objects.equals(username, black)) {
+                opponent = ChessGame.TeamColor.WHITE;
+            }
             if (Objects.equals(username, white) && game.getTeamTurn() != ChessGame.TeamColor.WHITE) {
                 ctx.send(new Gson().toJson(
                     new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
@@ -137,7 +143,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             NotificationMessage notificationMessage =
                     new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, moveMessage);
             connections.broadcast(ctx.session, notificationMessage, makeMoveCommand.getGameID(), moveMessage, game);
-            if (game.isInCheckmate())
+            if (game.isInCheckmate(opponent)) {
+                game.setOver(true);
+                gameDataAccess.updateGame(makeMoveCommand.getGameID(), white, black, game);
+                String checkmateMessage = opponent + " has lost the game (checkmate)";
+                NotificationMessage checkmateSelf = new NotificationMessage(
+                        ServerMessage.ServerMessageType.NOTIFICATION, checkmateMessage);
+                connections.broadcast(null, checkmateSelf, makeMoveCommand.getGameID(), checkmateMessage, game);
+            } else if (game.isInCheck(opponent)) {
+
+            }
         } catch (Exception e) {
             ctx.send(new Gson().toJson(
                     new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage())));
