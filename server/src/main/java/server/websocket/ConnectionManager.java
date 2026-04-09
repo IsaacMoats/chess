@@ -38,11 +38,7 @@ public class ConnectionManager {
     private final Gson gson = new Gson();
 
     public void broadcast(Session exclude, ServerMessage message, int gameId, ChessGame game, String username) throws IOException {
-        String json;
-            String messageToSend = String.format("%s has joined the game", username);
-            NotificationMessage loadGameMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, messageToSend);
-            json = gson.toJson(loadGameMessage);
-
+        String json = new Gson().toJson(message);
         for (Session s : connections.getOrDefault(gameId, Set.of())) {
             if (s.isOpen() && !s.equals(exclude)) {
                 s.getRemote().sendString(json);

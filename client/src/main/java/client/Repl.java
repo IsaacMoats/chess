@@ -248,6 +248,10 @@ public class Repl implements NotificationHandler {
         return printWhiteOnly(board);
     }
 
+    public void leave() {
+        System.out.println("Leave game");
+    }
+
     public String eval(String input) {
         try {
             String[] tokens = input.toUpperCase().split(" ");
@@ -264,6 +268,7 @@ public class Repl implements NotificationHandler {
 //                case "D" -> clearGame();
                 case "HELP" -> help();
                 case "WATCH" -> watch(params);
+//                case "LEAVE" -> leave();
                 default -> throw new IllegalStateException("Not on options list: " + cmd);
             };
         } catch (Throwable ex) {
@@ -279,7 +284,7 @@ public class Repl implements NotificationHandler {
                     - Quit
                     - Help
                     """;
-        } else {
+        } else if (Objects.equals(state, "signed in")){
             return """
                     - Create <Game name>
                     - Logout
@@ -288,6 +293,15 @@ public class Repl implements NotificationHandler {
                     - Watch <Game ID>
                     - Quit
                     - Help
+                    """;
+        } else {
+            return """
+                    - Help
+                    - Redraw Board
+                    - Leave
+                    - Move
+                    - Resign
+                    - Highlight legal moves
                     """;
         }
     }
