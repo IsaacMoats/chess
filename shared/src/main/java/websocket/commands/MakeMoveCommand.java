@@ -8,4 +8,5 @@ public class MakeMoveCommand extends UserGameCommand{
         super(commandType, authToken, gameID);
         this.move = move;
     }
+
 }

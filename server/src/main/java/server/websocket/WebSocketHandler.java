@@ -7,9 +7,11 @@ import dataaccess.SQLGameDataAccess;
 import exception.DataAccessException;
 import io.javalin.websocket.*;
 import model.AuthData;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.UserService;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -40,7 +42,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.add(userGameCommand.getGameID(), session);
             switch (userGameCommand.getCommandType()) {
                 case CONNECT -> connect(ctx, userGameCommand);
-                case MAKE_MOVE -> makeMove(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
+                case MAKE_MOVE -> makeMove(ctx, new Gson().fromJson(ctx.message(), MakeMoveCommand.class));
                 case LEAVE -> leave(ctx, userGameCommand);
                 case RESIGN -> resign(ctx, userGameCommand);
             }
@@ -91,13 +93,36 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
 
-    public void makeMove(Session session, String username, int gameID) throws IOException, SQLException, DataAccessException {
-        ChessGame game = userService.getGame(gameID);
-        LoadGameMessage gameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
-        NotificationMessage moveMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "MOVE MADE");
-        connections.sendSelf(session, gameMessage, game);
-        connections.broadcast(session, gameMessage, gameID, null);
-        connections.broadcast(session, moveMessage, gameID, null);
+    public void makeMove(WsContext ctx, MakeMoveCommand makeMoveCommand) throws IOException, SQLException, DataAccessException {
+        try {
+            if (authDataID(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), ctx)) {
+                ChessGame game = gameDataAccess.getGame(makeMoveCommand.getGameID());
+                if (game.getOver()) {
+                    ctx.send(new Gson().toJson(
+                            new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+                                    "Error: Game is over! Cannot make move")));
+                }
+                String white = gameDataAccess.getGameData(makeMoveCommand.getGameID()).whiteUsername();
+                String black = gameDataAccess.getGameData(makeMoveCommand.getGameID()).blackUsername();
+                String username = authDataAccess.getUser(makeMoveCommand.getAuthToken());
+                if (Objects.equals(username, white) && game.getTeamTurn() != ChessGame.TeamColor.WHITE) {
+                    ctx.send(new Gson().toJson(
+                            new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+                                    "Error: Not your turn! Cannot make move")));
+                } else if (Objects.equals(username, black) && game.getTeamTurn() != ChessGame.TeamColor.BLACK) {
+                    ctx.send(new Gson().toJson(
+                            new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+                                    "Error: Not your turn! Cannot make move")));
+                } else if (!Objects.equals(username, white) && !Objects.equals(username, black)) {
+                    ctx.send(new Gson().toJson(
+                            new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+                                    "Error: Not a player! Cannot make move")));
+                }
+            }
+        } catch (Exception e) {
+            ctx.send(new Gson().toJson(
+                    new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage())));
+        }
     }
 
     @Override
