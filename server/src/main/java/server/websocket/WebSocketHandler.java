@@ -54,10 +54,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         // Figure out how to authenticate and get username
         String message = String.format("%s has joined the game", username);
         ChessGame game = userService.getGame(gameID);
-        LoadGameMessage notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
         //Figure out how to broadcast and make notifications
-        connections.broadcast(null, notification, gameID);
-        connections.broadcast(session, notification, gameID);
+        connections.sendSelf(session, notification, game);
+        connections.broadcast(session, notification, gameID, game);
     }
 
     public void leave(int gameID, String authToken, Session session){

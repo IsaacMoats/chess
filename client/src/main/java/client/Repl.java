@@ -165,7 +165,7 @@ public class Repl implements NotificationHandler {
 
     public String joinGame(String... params) throws DataAccessException {
         if (params.length != 2) {
-            return "Input the number of the game to join.";
+            return "Expected <GameID> <WHITE|BLACK>";
         }
         if (!Objects.equals(state, "signed in")) {
             return "Must be logged in to join games!";
@@ -176,6 +176,12 @@ public class Repl implements NotificationHandler {
             return "Please input a valid number (1, 2, 3 ...) for the game to join";
         }
         int gameID = Integer.parseInt(params[0]);
+        int counter = 0;
+        var games = server.listGames();
+        for (ListGameResponse gameResponse : games.games()) {
+            counter++;
+        }
+        gameTotal = counter;
         if (gameID < 0 || gameID > gameTotal) {
             return "Choose a valid game from the list!";
         }

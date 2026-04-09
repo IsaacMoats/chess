@@ -37,16 +37,32 @@ public class ConnectionManager {
     private final Gson gson = new Gson();
 
     public void broadcast(Session exclude, ServerMessage message, int gameId, ChessGame game) throws IOException {
+        String json;
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-            websocket.messages.LoadGameMessage loadGameMessage = (ServerMessage.ServerMessageType.LOAD_GAME, game);
+            ServerMessage loadGameMessage = new ServerMessage(
+                    ServerMessage.ServerMessageType.NOTIFICATION);
+            loadGameMessage.setMessage("Player has joined the game");
+            json = gson.toJson(loadGameMessage);
+        } else {
+            json = gson.toJson(message);
         }
-        String json = gson.toJson(message);
+
         for (Session s : connections.getOrDefault(gameId, Set.of())) {
             if (s.isOpen() && !s.equals(exclude)) {
                 s.getRemote().sendString(json);
             }
         }
     }
-    public void sendMessage(LoadGameMessage )
+    public void sendSelf(Session session, ServerMessage message, ChessGame game) throws IOException {
+        String json;
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            websocket.messages.LoadGameMessage loadGameMessage = new LoadGameMessage(
+                    ServerMessage.ServerMessageType.LOAD_GAME, game);
+            json = gson.toJson(loadGameMessage);
+        } else {
+            json = gson.toJson(message);
+        }
+        session.getRemote().sendString(json);
+    }
 
 }
