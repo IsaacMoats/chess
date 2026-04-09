@@ -50,6 +50,45 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
+    public void resign(WsContext ctx, UserGameCommand userGameCommand) throws SQLException, DataAccessException {
+        try {
+            if (authDataID(userGameCommand.getAuthToken(), userGameCommand.getGameID(), ctx)) {
+                ChessGame game = gameDataAccess.getGame(userGameCommand.getGameID());
+                String white = gameDataAccess.getGameData(userGameCommand.getGameID()).whiteUsername();
+                String black = gameDataAccess.getGameData(userGameCommand.getGameID()).blackUsername();
+                String username = authDataAccess.getUser(userGameCommand.getAuthToken());
+                if (game.getOver()) {
+                    ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+                            "Error: game is already over")));
+                    return;
+                }
+                if (Objects.equals(username, white)) {
+                    game.setOver(true);
+                    gameDataAccess.updateGame(userGameCommand.getGameID(), white, black, game);
+                    ctx.send(new Gson().toJson(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                            "You resigned")));
+                    String message = username + " has resigned (white side).";
+                    NotificationMessage notificationMessage = new NotificationMessage(
+                            ServerMessage.ServerMessageType.NOTIFICATION, message);
+                    connections.broadcast(ctx.session, notificationMessage, userGameCommand.getGameID(), message);
+                } else if (Objects.equals(username, black)) {
+                    game.setOver(true);
+                    gameDataAccess.updateGame(userGameCommand.getGameID(), white, black, game);
+                    ctx.send(new Gson().toJson(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                            "You resigned")));
+                    String message = username + " has resigned (black side).";
+                    NotificationMessage notificationMessage = new NotificationMessage(
+                            ServerMessage.ServerMessageType.NOTIFICATION, message);
+                    connections.broadcast(ctx.session, notificationMessage, userGameCommand.getGameID(), message);
+                } else {
+                    ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+                            "Error: cannot resign if watching")));
+                }
+            }
+        } catch (DataAccessException | RuntimeException | SQLException | IOException e) {
+            ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage())));
+        }
+    }
 
 
     public void makeMove(Session session, String username, int gameID) throws IOException, SQLException, DataAccessException {

@@ -14,6 +14,7 @@ public class ChessGame {
 
     private ChessGame.TeamColor teamTurn = TeamColor.WHITE;
     private ChessBoard board = new ChessBoard();
+    private Boolean isOver = false;
 
     /**
      * Returns the position of the king for the given team as a ChessPosition object.
@@ -31,6 +32,14 @@ public class ChessGame {
             }
         }
         return kingPosition;
+    }
+
+    public Boolean getOver() {
+        return isOver;
+    }
+
+    public void setOver(Boolean over) {
+        isOver = over;
     }
 
     @Override
