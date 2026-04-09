@@ -40,7 +40,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (userGameCommand.getCommandType()) {
                 case CONNECT -> connect(ctx, userGameCommand);
 //                case MAKE_MOVE -> makeMove(session, username, gameID);
-//                case LEAVE -> leave(gameID, authToken, session);
+                case LEAVE -> leave(ctx, userGameCommand);
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
@@ -64,25 +64,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     public void connect(WsContext ctx, UserGameCommand command) throws IOException, SQLException, DataAccessException {
         try {
-            AuthData authData = authDataAccess.getAuthData(command.getAuthToken());
-            if (authData == null) {
-                ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: no access")));
-                return;
+            if (authDataID(command.getAuthToken(), command.getGameID(), ctx)) {
+                String username = authDataAccess.getUser(command.getAuthToken());
+                ChessGame game = gameDataAccess.getGame(command.getGameID());
+                int gameID = command.getGameID();
+                authDataID(command.getAuthToken(), command.getGameID(), ctx);
+                LoadGameMessage selfNotification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
+                String intro = username + " has joined the game. ";
+                connections.sendSelf(ctx.session, selfNotification, game);
+                NotificationMessage broadcastNotification =
+                        new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, intro);
+                connections.broadcast(ctx.session, broadcastNotification, gameID, game, username);
             }
-            String username = authDataAccess.getUser(command.getAuthToken());
-            int gameID = command.getGameID();
-            ChessGame game = gameDataAccess.getGame(gameID);
-            if (game == null) {
-                ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
-                        "Error: game does not exist")));
-                return;
-            }
-            LoadGameMessage selfNotification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
-            String intro = username + " has joined the game. ";
-            connections.sendSelf(ctx.session, selfNotification, game);
-            NotificationMessage broadcastNotification =
-                    new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, intro);
-            connections.broadcast(ctx.session, broadcastNotification, gameID, game, username);
         } catch (DataAccessException e) {
             ctx.send(new Gson().toJson(
                     new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage())));
@@ -90,10 +83,31 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    public void leave(int gameID, String authToken, Session session){
-        connections.delete(gameID, session);
-        String userName = " ";
-        String message = String.format("%s has left the game", userName);
+    public void leave(WsContext ctx, UserGameCommand userGameCommand){
+        try {
+            if (authDataID(userGameCommand.getAuthToken(), userGameCommand.getGameID(), ctx)) {
+                String white = gameDataAccess.getGameData(userGameCommand.getGameID()).whiteUsername();
+                String black = gameDataAccess.getGameData(userGameCommand.getGameID()).blackUsername();
+
+            }
+        } catch (DataAccessException | RuntimeException | SQLException e) {
+            ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage())));
+        }
+    }
+
+    private boolean authDataID(String authToken, int gameID, WsContext ctx) throws DataAccessException, SQLException {
+        AuthData authData = authDataAccess.getAuthData(authToken);
+        if (authData == null) {
+            ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: no access")));
+            return false;
+        }
+        ChessGame game = gameDataAccess.getGame(gameID);
+        if (game == null) {
+            ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+                    "Error: game does not exist")));
+            return false;
+        }
+        return true;
     }
 
 //    public void test(String username, int gameID) throws IOException {
