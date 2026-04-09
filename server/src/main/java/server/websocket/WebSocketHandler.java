@@ -1,6 +1,7 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import dataaccess.SQLAuthDataAccess;
 import dataaccess.SQLGameDataAccess;
@@ -95,30 +96,37 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     public void makeMove(WsContext ctx, MakeMoveCommand makeMoveCommand) throws IOException, SQLException, DataAccessException {
         try {
-            if (authDataID(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), ctx)) {
-                ChessGame game = gameDataAccess.getGame(makeMoveCommand.getGameID());
-                if (game.getOver()) {
-                    ctx.send(new Gson().toJson(
-                            new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
-                                    "Error: Game is over! Cannot make move")));
-                }
-                String white = gameDataAccess.getGameData(makeMoveCommand.getGameID()).whiteUsername();
-                String black = gameDataAccess.getGameData(makeMoveCommand.getGameID()).blackUsername();
-                String username = authDataAccess.getUser(makeMoveCommand.getAuthToken());
-                if (Objects.equals(username, white) && game.getTeamTurn() != ChessGame.TeamColor.WHITE) {
-                    ctx.send(new Gson().toJson(
-                            new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
-                                    "Error: Not your turn! Cannot make move")));
-                } else if (Objects.equals(username, black) && game.getTeamTurn() != ChessGame.TeamColor.BLACK) {
-                    ctx.send(new Gson().toJson(
-                            new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
-                                    "Error: Not your turn! Cannot make move")));
-                } else if (!Objects.equals(username, white) && !Objects.equals(username, black)) {
-                    ctx.send(new Gson().toJson(
-                            new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
-                                    "Error: Not a player! Cannot make move")));
-                }
+            if (!authDataID(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), ctx)) {
+               return;
             }
+            ChessGame game = gameDataAccess.getGame(makeMoveCommand.getGameID());
+            if (game.getOver()) {
+                ctx.send(new Gson().toJson(
+                    new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+            "Error: Game is over! Cannot make move")));
+            }
+            String white = gameDataAccess.getGameData(makeMoveCommand.getGameID()).whiteUsername();
+            String black = gameDataAccess.getGameData(makeMoveCommand.getGameID()).blackUsername();
+            String username = authDataAccess.getUser(makeMoveCommand.getAuthToken());
+            if (Objects.equals(username, white) && game.getTeamTurn() != ChessGame.TeamColor.WHITE) {
+                ctx.send(new Gson().toJson(
+                    new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+            "Error: Not your turn! Cannot make move")));
+            } else if (Objects.equals(username, black) && game.getTeamTurn() != ChessGame.TeamColor.BLACK) {
+                ctx.send(new Gson().toJson(
+                    new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+            "Error: Not your turn! Cannot make move")));
+            } else if (!Objects.equals(username, white) && !Objects.equals(username, black)) {
+                ctx.send(new Gson().toJson(
+                    new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+            "Error: Not a player! Cannot make move")));
+            }
+
+            ChessMove move = makeMoveCommand.getMove();
+            game.makeMove(move);
+            gameDataAccess.updateGame(makeMoveCommand.getGameID(), white, black, game);
+
+
         } catch (Exception e) {
             ctx.send(new Gson().toJson(
                     new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage())));
