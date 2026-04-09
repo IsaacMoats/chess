@@ -38,10 +38,11 @@ public class ConnectionManager {
     }
     private final Gson gson = new Gson();
 
-    public void broadcast(Session exclude, ServerMessage message, int gameId, ChessGame game, String username) throws IOException {
-//        if (connections.get(gameId) == null) {
-//            message = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "message");
-//        }
+    public void broadcast(Session exclude, ServerMessage message, int gameId, String notificationMessage) throws IOException {
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+            message = new NotificationMessage(
+                    ServerMessage.ServerMessageType.NOTIFICATION, notificationMessage);
+        }
         String json = new Gson().toJson(message);
         for (Session s : connections.getOrDefault(gameId, Set.of())) {
             if (s.isOpen() && !s.equals(exclude)) {

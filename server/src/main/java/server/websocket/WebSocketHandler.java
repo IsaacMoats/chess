@@ -18,6 +18,7 @@ import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     private final ConnectionManager connections = new ConnectionManager();
@@ -39,8 +40,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.add(userGameCommand.getGameID(), session);
             switch (userGameCommand.getCommandType()) {
                 case CONNECT -> connect(ctx, userGameCommand);
-//                case MAKE_MOVE -> makeMove(session, username, gameID);
+                case MAKE_MOVE -> makeMove(session, userGameCommand.getAuthToken(), userGameCommand.getGameID());
                 case LEAVE -> leave(ctx, userGameCommand);
+                case RESIGN -> resign(ctx, userGameCommand);
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
@@ -48,13 +50,15 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
+
+
     public void makeMove(Session session, String username, int gameID) throws IOException, SQLException, DataAccessException {
         ChessGame game = userService.getGame(gameID);
         LoadGameMessage gameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
         NotificationMessage moveMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "MOVE MADE");
         connections.sendSelf(session, gameMessage, game);
-        connections.broadcast(session, gameMessage, gameID, game, username);
-        connections.broadcast(session, moveMessage, gameID, game, username);
+        connections.broadcast(session, gameMessage, gameID, null);
+        connections.broadcast(session, moveMessage, gameID, null);
     }
 
     @Override
@@ -74,7 +78,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.sendSelf(ctx.session, selfNotification, game);
                 NotificationMessage broadcastNotification =
                         new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, intro);
-                connections.broadcast(ctx.session, broadcastNotification, gameID, game, username);
+                connections.broadcast(ctx.session, broadcastNotification, gameID, intro);
             }
         } catch (DataAccessException e) {
             ctx.send(new Gson().toJson(
@@ -84,13 +88,33 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     public void leave(WsContext ctx, UserGameCommand userGameCommand){
+        boolean playing = false;
+        String message;
         try {
             if (authDataID(userGameCommand.getAuthToken(), userGameCommand.getGameID(), ctx)) {
+                AuthData authData = authDataAccess.getAuthData(userGameCommand.getAuthToken());
                 String white = gameDataAccess.getGameData(userGameCommand.getGameID()).whiteUsername();
                 String black = gameDataAccess.getGameData(userGameCommand.getGameID()).blackUsername();
+                if (Objects.equals(white, authData.username())) {
+                    white = null;
+                    playing = true;
+                    message = authData.username() + " quit playing the game. White is now open to play.";
+                } else if (Objects.equals(black, authData.username())) {
+                    black = null;
+                    playing = true;
+                    message = authData.username() + " quit playing the game. Black is now open to play.";
+                } else {
+                    message = authData.username() + " quit watching the game.";
+                }
+                gameDataAccess.updateGame(userGameCommand.getGameID(), white, black,
+                        gameDataAccess.getGame(userGameCommand.getGameID()));
+                connections.delete(userGameCommand.getGameID(), ctx.session);
 
+                NotificationMessage notificationMessage =
+                        new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+                connections.broadcast(ctx.session, notificationMessage, userGameCommand.getGameID(), message);
             }
-        } catch (DataAccessException | RuntimeException | SQLException e) {
+        } catch (DataAccessException | RuntimeException | SQLException | IOException e) {
             ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage())));
         }
     }

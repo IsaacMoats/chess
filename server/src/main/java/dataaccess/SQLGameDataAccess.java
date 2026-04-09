@@ -63,6 +63,22 @@ public class SQLGameDataAccess {
         return gameID;
     }
 
+    public void updateGame(int gameID, String whiteUsername, String blackUsername, ChessGame game) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    "UPDATE gameData SET whiteUsername=?, blackUsername=?, game=? WHERE gameID=?"
+            );
+            String json = new Gson().toJson(game);
+            preparedStatement.setString(1, whiteUsername);
+            preparedStatement.setString(2, blackUsername);
+            preparedStatement.setString(3, json);
+            preparedStatement.setInt(4, gameID);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Bad Connection", 500);
+        }
+    }
+
     public GameData joinGame(String user, String color, Integer gameID) throws DataAccessException {
         GameData gameData = null;
         if (gameID == null) {
