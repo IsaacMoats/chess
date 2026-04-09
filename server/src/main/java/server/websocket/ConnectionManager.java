@@ -4,6 +4,7 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import server.Server;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
@@ -38,6 +39,9 @@ public class ConnectionManager {
     private final Gson gson = new Gson();
 
     public void broadcast(Session exclude, ServerMessage message, int gameId, ChessGame game, String username) throws IOException {
+//        if (connections.get(gameId) == null) {
+//            message = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "message");
+//        }
         String json = new Gson().toJson(message);
         for (Session s : connections.getOrDefault(gameId, Set.of())) {
             if (s.isOpen() && !s.equals(exclude)) {

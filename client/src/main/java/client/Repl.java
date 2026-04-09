@@ -11,6 +11,9 @@ import model.GameData;
 import model.JoinGameRequest;
 import model.ListGameResponse;
 import model.UserData;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
@@ -310,5 +313,11 @@ public class Repl implements NotificationHandler {
     public void notify(ServerMessage serverMessage) {
         System.out.println(serverMessage);
         // swtich case on message type (notification, error, load game)
+        switch (serverMessage.getServerMessageType()) {
+            case ServerMessage.ServerMessageType.NOTIFICATION -> {
+
+            }
+        }
     }
+
 }

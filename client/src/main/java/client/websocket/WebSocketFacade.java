@@ -3,6 +3,7 @@ import com.google.gson.Gson;
 import exception.DataAccessException;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -46,6 +47,12 @@ public class WebSocketFacade extends Endpoint {
             throw new DataAccessException(ex.getMessage(), 400);
         }
     }
+
+//    public void badID() throws IOException {
+////        ErrorMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: bad game ID");
+////        UserGameCommand userGameCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+//        this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
+//    }
 
     public void leaveGame(String authToken, int gameID) throws DataAccessException {
         try {
