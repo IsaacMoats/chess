@@ -125,6 +125,26 @@ public class SQLGameDataAccess {
         return gameData;
     }
 
+    public ChessGame getGame(Integer gameID) throws DataAccessException, SQLException {
+        if (gameID == null) {
+            throw new DataAccessException("No gameID given!", 400);
+        }
+        try (Connection conn = DatabaseManager.getConnection()) {
+            PreparedStatement preparedStatement = null;
+            preparedStatement = conn.prepareStatement("SELECT * FROM gameData WHERE gameID=?");
+            preparedStatement.setInt(1, gameID);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new Gson().fromJson(resultSet.getString("game"), ChessGame.class);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new DataAccessException("Bad Connection", 500);
+        }
+        return new ChessGame();
+    }
+
     public void deleteGameData() throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             PreparedStatement preparedStatement = conn.prepareStatement("TRUNCATE TABLE gameData");

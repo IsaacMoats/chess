@@ -8,6 +8,7 @@ import model.GameData;
 import model.ListGameResponse;
 import model.UserData;
 
+import java.sql.SQLException;
 import java.util.Collection;
 
 // register
@@ -16,6 +17,10 @@ public class UserService {
     public final SQLAuthDataAccess authDataAccess = new SQLAuthDataAccess();
     public final SQLGameDataAccess gameDataAccess = new SQLGameDataAccess();
 
+
+    public ChessGame getGame(int gameID) throws SQLException, DataAccessException {
+        return gameDataAccess.getGame(gameID);
+    }
     public AuthData addUser(UserData userData) throws DataAccessException {
         userDataAccess.storeUserPassword(userData.username(), userData.password(), userData.email());
         String authToken = SQLAuthDataAccess.generateToken();

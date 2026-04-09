@@ -4,24 +4,29 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import client.websocket.NotificationHandler;
+import client.websocket.WebSocketFacade;
 import exception.DataAccessException;
 import model.GameData;
 import model.JoinGameRequest;
 import model.ListGameResponse;
 import model.UserData;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
-public class Repl {
+public class Repl implements NotificationHandler {
     private final ServerFacade server;
     private String state = "signed out";
     private int gameTotal = 0;
+    private final WebSocketFacade ws;
 
     public Repl(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
+        ws = new WebSocketFacade(serverUrl, this);
     }
 
     public void run() {
@@ -159,7 +164,7 @@ public class Repl {
     }
 
     public String joinGame(String... params) throws DataAccessException {
-        if (params.length != 1) {
+        if (params.length != 2) {
             return "Input the number of the game to join.";
         }
         if (!Objects.equals(state, "signed in")) {
@@ -192,9 +197,8 @@ public class Repl {
         } else if (Objects.equals(params[1], "WHITE")) {
             printable = printable.concat(printWhiteOnly(board));
         }
-
+        ws.enterGame(server.authToken, gameID);
         return printable;
-
     }
 
     private String printWhiteOnly(ChessBoard board) {
@@ -280,5 +284,11 @@ public class Repl {
                     - Help
                     """;
         }
+    }
+
+    @Override
+    public void notify(ServerMessage serverMessage) {
+        System.out.println(serverMessage);
+        // swtich case on message type (notification, error, load game)
     }
 }

@@ -13,6 +13,7 @@ import model.JoinGameRequest;
 import server.websocket.WebSocketHandler;
 import service.UserService;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
@@ -20,6 +21,7 @@ public class Server {
 
     private final Javalin javalin;
     private UserService userService = new UserService();
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
         try {
@@ -28,7 +30,7 @@ public class Server {
             System.out.println("failed to create database");
         }
         userService = new UserService();
-        server.websocket.WebSocketHandler webSocketHandler = new WebSocketHandler();
+        webSocketHandler = new WebSocketHandler();
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::addUser)
                 .delete("/db", this::clear)
@@ -100,13 +102,12 @@ public class Server {
         String authToken = ctx.header("authorization");
         if (userService.authenticate(authToken)) {
             GameData gameName = new Gson().fromJson(ctx.body(), GameData.class);
-
             Integer gameID = userService.createGame(gameName);
             ctx.result("{\"gameID\":\"" + gameID + "\"}");
         }
     }
 
-    private void joinGame(Context ctx) throws DataAccessException{
+    private void joinGame(Context ctx) throws DataAccessException, IOException {
         String authToken = ctx.header("authorization");
         if (userService.authenticate(authToken)){
             JoinGameRequest game = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
@@ -119,6 +120,7 @@ public class Server {
             GameData gameData = userService.joinGame(user, game.playerColor(), game.gameID());
             String gameString = new Gson().toJson(gameData.game());
             ctx.result(gameString);
+//            webSocketHandler.test(userService.getUser(authToken), game.gameID());
         }
     }
 }
