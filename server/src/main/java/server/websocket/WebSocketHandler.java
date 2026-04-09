@@ -73,7 +73,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     String message = username + " has resigned (white side).";
                     NotificationMessage notificationMessage = new NotificationMessage(
                             ServerMessage.ServerMessageType.NOTIFICATION, message);
-                    connections.broadcast(ctx.session, notificationMessage, userGameCommand.getGameID(), message);
+                    connections.broadcast(ctx.session, notificationMessage, userGameCommand.getGameID(), message, null);
                 } else if (Objects.equals(username, black)) {
                     game.setOver(true);
                     gameDataAccess.updateGame(userGameCommand.getGameID(), white, black, game);
@@ -82,7 +82,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     String message = username + " has resigned (black side).";
                     NotificationMessage notificationMessage = new NotificationMessage(
                             ServerMessage.ServerMessageType.NOTIFICATION, message);
-                    connections.broadcast(ctx.session, notificationMessage, userGameCommand.getGameID(), message);
+                    connections.broadcast(ctx.session, notificationMessage, userGameCommand.getGameID(), message, null);
                 } else {
                     ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
                             "Error: cannot resign if watching")));
@@ -104,6 +104,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 ctx.send(new Gson().toJson(
                     new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
             "Error: Game is over! Cannot make move")));
+                return;
             }
             String white = gameDataAccess.getGameData(makeMoveCommand.getGameID()).whiteUsername();
             String black = gameDataAccess.getGameData(makeMoveCommand.getGameID()).blackUsername();
@@ -112,21 +113,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 ctx.send(new Gson().toJson(
                     new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
             "Error: Not your turn! Cannot make move")));
+                return;
             } else if (Objects.equals(username, black) && game.getTeamTurn() != ChessGame.TeamColor.BLACK) {
                 ctx.send(new Gson().toJson(
                     new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
             "Error: Not your turn! Cannot make move")));
+                return;
             } else if (!Objects.equals(username, white) && !Objects.equals(username, black)) {
                 ctx.send(new Gson().toJson(
                     new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
             "Error: Not a player! Cannot make move")));
+                return;
             }
 
             ChessMove move = makeMoveCommand.getMove();
             game.makeMove(move);
             gameDataAccess.updateGame(makeMoveCommand.getGameID(), white, black, game);
-
-
+            LoadGameMessage selfNotification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
+            connections.sendSelf(ctx.session, selfNotification, game);
+            LoadGameMessage broadcastGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
+            connections.broadcast(ctx.session, broadcastGame, makeMoveCommand.getGameID(), null, game);
         } catch (Exception e) {
             ctx.send(new Gson().toJson(
                     new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage())));
@@ -150,7 +156,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.sendSelf(ctx.session, selfNotification, game);
                 NotificationMessage broadcastNotification =
                         new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, intro);
-                connections.broadcast(ctx.session, broadcastNotification, gameID, intro);
+                connections.broadcast(ctx.session, broadcastNotification, gameID, intro, null);
             }
         } catch (DataAccessException e) {
             ctx.send(new Gson().toJson(
@@ -184,7 +190,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
                 NotificationMessage notificationMessage =
                         new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-                connections.broadcast(ctx.session, notificationMessage, userGameCommand.getGameID(), message);
+                connections.broadcast(ctx.session, notificationMessage, userGameCommand.getGameID(), message, null);
             }
         } catch (DataAccessException | RuntimeException | SQLException | IOException e) {
             ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage())));

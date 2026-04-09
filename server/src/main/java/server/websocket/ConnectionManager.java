@@ -38,10 +38,13 @@ public class ConnectionManager {
     }
     private final Gson gson = new Gson();
 
-    public void broadcast(Session exclude, ServerMessage message, int gameId, String notificationMessage) throws IOException {
+    public void broadcast(Session exclude, ServerMessage message, int gameId,
+                          String notificationMessage, ChessGame game) throws IOException {
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
             message = new NotificationMessage(
                     ServerMessage.ServerMessageType.NOTIFICATION, notificationMessage);
+        } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            message = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
         }
         String json = new Gson().toJson(message);
         for (Session s : connections.getOrDefault(gameId, Set.of())) {
