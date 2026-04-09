@@ -21,6 +21,10 @@ public class UserService {
     public ChessGame getGame(int gameID) throws SQLException, DataAccessException {
         return gameDataAccess.getGame(gameID);
     }
+
+    public AuthData getAuthData(String username) throws DataAccessException {
+        return authDataAccess.getAuthDataFromUsername(username);
+    }
     public AuthData addUser(UserData userData) throws DataAccessException {
         userDataAccess.storeUserPassword(userData.username(), userData.password(), userData.email());
         String authToken = SQLAuthDataAccess.generateToken();
@@ -72,4 +76,8 @@ public class UserService {
     public Collection<ListGameResponse> listGames() throws DataAccessException {
         return gameDataAccess.listGames();
     }
+
+//    public AuthData getAuthData(String user) {
+//        return;
+//    }
 }

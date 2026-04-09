@@ -127,4 +127,21 @@ public class SQLAuthDataAccess {
         }
         return "hi";
     }
+
+    public AuthData getAuthDataFromUsername(String username) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            PreparedStatement preparedStatement = conn.prepareStatement(
+                    "SELECT username, authToken FROM authData WHERE username=?"
+            );
+            preparedStatement.setString(1, username);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new AuthData(username, resultSet.getString("authToken"));
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException("Bad Connection", 500);
+        }
+        return new AuthData(null, null);
+    }
 }

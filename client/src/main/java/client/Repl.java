@@ -1,31 +1,32 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import exception.DataAccessException;
-import model.GameData;
-import model.JoinGameRequest;
-import model.ListGameResponse;
-import model.UserData;
+import model.*;
+import websocket.commands.MakeMoveCommand;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
 public class Repl implements NotificationHandler {
+    private AuthData authData = null;
+    private ChessGame currentGame;
+    private int gameID;
     private final ServerFacade server;
     private String state = "signed out";
     private int gameTotal = 0;
     private final WebSocketFacade ws;
+    private String color = null;
 
     public Repl(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
@@ -57,7 +58,7 @@ public class Repl implements NotificationHandler {
             state = "signed in";
             UserData userData = new UserData(params[0], params[1], params[2]);
             server.addUser(userData);
-            server.loginUser(userData);
+            this.authData = server.loginUser(userData);
             return "Welcome " + params[0] +". You have registered successfully and logged in.";
         }
         throw new DataAccessException("Expected: <Username> <Password> <email>", 400);
@@ -66,7 +67,8 @@ public class Repl implements NotificationHandler {
     public String signIn(String... params) throws DataAccessException {
         if (params.length == 2) {
             UserData userData = new UserData(params[0], params[1], "email");
-            server.loginUser(userData);
+            this.authData = server.loginUser(userData);
+
             state = "signed in";
             return "Welcome back " + params[0] +". You have successfully logged in.";
         } else {
@@ -94,6 +96,7 @@ public class Repl implements NotificationHandler {
         }
         server.logoutUser();
         state = "signed out";
+        authData = null;
         return "Successfully logged out.";
     }
 
@@ -190,6 +193,8 @@ public class Repl implements NotificationHandler {
         }
         JoinGameRequest joinGameRequest = new JoinGameRequest(params[1], gameID);
         ChessGame game = server.joinGame(joinGameRequest);
+        this.currentGame = game;
+        this.gameID = gameID;
         String printable = "";
         ChessBoard board = game.getBoard();
         //For black
@@ -203,10 +208,13 @@ public class Repl implements NotificationHandler {
                 printable = printable.concat(RESET_BG_COLOR + i + "\n");
             }
             printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+            this.color = "black";
         } else if (Objects.equals(params[1], "WHITE")) {
+            this.color = "white";
             printable = printable.concat(printWhiteOnly(board));
         }
         ws.enterGame(server.authToken, gameID);
+        state = "in game";
         return printable;
     }
 
@@ -224,13 +232,8 @@ public class Repl implements NotificationHandler {
         return printable;
     }
 
-    public String clearGame() throws DataAccessException {
-        server.clear();
-        state = "signed out";
-        return "Game cleared! All ";
-    }
 
-    public String watch(String... params) {
+    public String watch(String... params) throws DataAccessException {
         if (params.length != 1) {
             return "Input the number of a game to watch.";
         }
@@ -243,16 +246,61 @@ public class Repl implements NotificationHandler {
             return "Please input a valid number (1, 2, 3 ...) for the game to watch";
         }
         int gameID = Integer.parseInt(params[0]);
+        int counter = 0;
+        var games = server.listGames();
+        for (ListGameResponse gameResponse : games.games()) {
+            counter++;
+        }
+        gameTotal = counter;
         if (gameID < 0 || gameID > gameTotal) {
             return "Choose a valid game from the list!";
         }
         ChessGame game = new ChessGame();
         ChessBoard board = game.getBoard();
+        ws.enterGame(server.authToken, gameID);
         return printWhiteOnly(board);
     }
 
-    public void leave() {
-        System.out.println("Leave game");
+    public void leave() throws IOException {
+        if (authData == null) {
+            System.out.println("Cannot leave game when not signed in");
+            return;
+        }
+        ws.sendUserCommand(new UserGameCommand(
+                UserGameCommand.CommandType.LEAVE,
+                authData.authToken(),
+                this.gameID));
+        state = "signed in";
+    }
+
+    public String move() throws Exception {
+        if (currentGame.getOver()) {
+            return "The game is over.";
+        }
+        System.out.println("Starting position: ");
+        String start = new Scanner(System.in).nextLine();
+        System.out.println("End position: ");
+        String end = new Scanner(System.in).nextLine();
+
+        try {
+            ChessPosition startPosition = makePosition(start);
+            ChessPosition endPosition = makePosition(end);
+            ChessPiece.PieceType promotion = null;
+            ChessPiece piece = currentGame.getBoard().getPiece(startPosition);
+            if (piece != null && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                if (endPosition.getRow() == 8 || endPosition.getRow() == 1) {
+                    System.out.println("Promote the pawn to a queen, rook, bishop, or knight.");
+                    promotion = ChessPiece.PieceType.valueOf(new Scanner(System.in).nextLine().trim().toUpperCase());
+                }
+            }
+            ChessMove move = new ChessMove(startPosition, endPosition, promotion);
+            ws.sendUserCommand(new MakeMoveCommand
+                    (UserGameCommand.CommandType.MAKE_MOVE, authData.authToken(), gameID, move));
+
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+        return null;
     }
 
     public String eval(String input) {
@@ -271,6 +319,7 @@ public class Repl implements NotificationHandler {
 //                case "D" -> clearGame();
                 case "HELP" -> help();
                 case "WATCH" -> watch(params);
+                case "MOVE" -> move();
 //                case "LEAVE" -> leave();
                 default -> throw new IllegalStateException("Not on options list: " + cmd);
             };
@@ -309,15 +358,40 @@ public class Repl implements NotificationHandler {
         }
     }
 
-    @Override
-    public void notify(ServerMessage serverMessage) {
-        System.out.println(serverMessage);
-        // swtich case on message type (notification, error, load game)
-        switch (serverMessage.getServerMessageType()) {
-            case ServerMessage.ServerMessageType.NOTIFICATION -> {
 
+    @Override
+    public void loadGame(LoadGameMessage message) {
+        ChessBoard board = this.currentGame.getBoard();
+        String printable = "";
+        if (Objects.equals(this.color, "black")) {
+            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+            for (int i = 1; i < 9; i++){
+                printable = printable.concat(RESET_BG_COLOR + i);
+                for(int j = 8; j > 0; j--){
+                    printable = printable.concat(printBoard(board, i, j));
+                }
+                printable = printable.concat(RESET_BG_COLOR + i + "\n");
             }
+            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+        } else if (Objects.equals(this.color, "white")) {
+            printable = printable.concat(printWhiteOnly(board));
         }
     }
 
+    @Override
+    public void notification(NotificationMessage message) {
+        System.out.println(message.getMessage());
+    }
+
+    @Override
+    public void error(ErrorMessage message) {
+        System.out.println(message.getErrorMessage());
+    }
+
+    private ChessPosition makePosition(String input) {
+        input = input.trim().toLowerCase();
+        int col = input.charAt(0) - 'a' + 1;
+        int row = input.charAt(1) - '0';
+        return new ChessPosition(row, col);
+    }
 }

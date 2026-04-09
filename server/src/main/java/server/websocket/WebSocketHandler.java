@@ -166,13 +166,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     public void connect(WsContext ctx, UserGameCommand command) throws IOException, SQLException, DataAccessException {
         try {
+            String intro = null;
             if (authDataID(command.getAuthToken(), command.getGameID(), ctx)) {
                 String username = authDataAccess.getUser(command.getAuthToken());
                 ChessGame game = gameDataAccess.getGame(command.getGameID());
+                GameData gameData = gameDataAccess.getGameData(command.getGameID());
+                if (Objects.equals(gameData.whiteUsername(), username)) {
+                    intro = username + " has joined the game as white.";
+                } else if (Objects.equals(gameData.blackUsername(), username)) {
+                    intro = username + " has joined the game as black.";
+                } else {
+                    intro = username + " has joined the game as a spectator.";
+                }
                 int gameID = command.getGameID();
                 authDataID(command.getAuthToken(), command.getGameID(), ctx);
                 LoadGameMessage selfNotification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
-                String intro = username + " has joined the game. ";
                 connections.sendSelf(ctx.session, selfNotification, game);
                 NotificationMessage broadcastNotification =
                         new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, intro);

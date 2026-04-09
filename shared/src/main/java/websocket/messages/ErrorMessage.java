@@ -9,6 +9,10 @@ public class ErrorMessage extends ServerMessage{
         this.errorMessage = message;
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
     @Override
     public String toString() {
         return errorMessage;

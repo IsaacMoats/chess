@@ -4,6 +4,8 @@ import exception.DataAccessException;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -28,7 +30,14 @@ public class WebSocketFacade extends Endpoint {
                 @Override
                 public void onMessage(String message) {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
-                    notificationHandler.notify(notification);
+                    switch (notification.getServerMessageType()) {
+                        case LOAD_GAME -> notificationHandler.loadGame(
+                                new Gson().fromJson(message, LoadGameMessage.class));
+                        case NOTIFICATION -> notificationHandler.notification(
+                                new Gson().fromJson(message, NotificationMessage.class));
+                        case ERROR -> notificationHandler.error(
+                                new Gson().fromJson(message, ErrorMessage.class));
+                    }
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -48,11 +57,6 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-//    public void badID() throws IOException {
-////        ErrorMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: bad game ID");
-////        UserGameCommand userGameCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
-//        this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
-//    }
 
     public void leaveGame(String authToken, int gameID) throws DataAccessException {
         try {
@@ -61,5 +65,9 @@ public class WebSocketFacade extends Endpoint {
         } catch (IOException ex) {
             throw new DataAccessException(ex.getMessage(), 400);
         }
+    }
+
+    public void sendUserCommand(UserGameCommand userGameCommand) throws IOException {
+        session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
     }
 }

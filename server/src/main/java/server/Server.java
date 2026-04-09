@@ -123,4 +123,8 @@ public class Server {
 //            webSocketHandler.test(userService.getUser(authToken), game.gameID());
         }
     }
+
+    public AuthData getAuthData(String username) throws DataAccessException {
+        return userService.getAuthData(username);
+    }
 }
