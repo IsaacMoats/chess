@@ -5,11 +5,10 @@ import chess.ChessGame;
 import java.util.Objects;
 
 public class LoadGameMessage {
-    private final ServerMessage.ServerMessageType serverMessageType;
-    private ChessGame game;
+    private final ServerMessage.ServerMessageType serverMessageType = ServerMessage.ServerMessageType.LOAD_GAME;
+    private final ChessGame game;
 
-    public LoadGameMessage(ServerMessage.ServerMessageType type, ChessGame game) {
-        this.serverMessageType = type;
+    public LoadGameMessage(ChessGame game) {
         this.game = game;
     }
 

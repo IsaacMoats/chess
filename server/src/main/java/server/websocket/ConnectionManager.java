@@ -56,8 +56,7 @@ public class ConnectionManager {
     public void sendSelf(Session session, ServerMessage message, ChessGame game) throws IOException {
         String json;
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-            websocket.messages.LoadGameMessage loadGameMessage = new LoadGameMessage(
-                    ServerMessage.ServerMessageType.LOAD_GAME, game);
+            websocket.messages.LoadGameMessage loadGameMessage = new LoadGameMessage(game);
             json = gson.toJson(loadGameMessage);
         } else {
             json = gson.toJson(message);
