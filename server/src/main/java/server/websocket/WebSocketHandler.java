@@ -9,6 +9,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.UserService;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
 
@@ -31,16 +32,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             Integer gameID = userGameCommand.getGameID();
-            // figure out how to get the username from the given authToken
             String authToken = userGameCommand.getAuthToken();
+            if (!userService.authenticate(authToken)) {
+                ErrorMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
+                        "Must log in with proper credentials");
+                connections.sendSelf(session, errorMessage, null);
+            }
             String username = userService.getUser(authToken);
             connections.add(gameID, session);
             switch (userGameCommand.getCommandType()) {
-                case CONNECT -> connect(session, username, userGameCommand, gameID);
+                case CONNECT -> connect(session, username, gameID);
                 case LEAVE -> leave(userGameCommand.getGameID(), userGameCommand.getAuthToken(), ctx.session);
             }
         } catch (Exception ex) {
-            System.out.println("Bad");
+            System.out.println(ex.getMessage());
         }
 
     }
@@ -50,14 +55,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    public void connect(Session session, String username, UserGameCommand userGameCommand, int gameID) throws IOException, SQLException, DataAccessException {
-        // Figure out how to authenticate and get username
-        String message = String.format("%s has joined the game", username);
+    public void connect(Session session, String username, int gameID) throws IOException, SQLException, DataAccessException {
         ChessGame game = userService.getGame(gameID);
-        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-        //Figure out how to broadcast and make notifications
+        ServerMessage notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
         connections.sendSelf(session, notification, game);
-        connections.broadcast(session, notification, gameID, game);
+        connections.broadcast(session, notification, gameID, game, username);
     }
 
     public void leave(int gameID, String authToken, Session session){

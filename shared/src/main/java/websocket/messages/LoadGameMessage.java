@@ -4,33 +4,16 @@ import chess.ChessGame;
 
 import java.util.Objects;
 
-public class LoadGameMessage {
-    private final ServerMessage.ServerMessageType serverMessageType = ServerMessage.ServerMessageType.LOAD_GAME;
+public class LoadGameMessage extends ServerMessage{
     private final ChessGame game;
 
-    public LoadGameMessage(ChessGame game) {
+    public LoadGameMessage(ServerMessageType type, ChessGame game) {
+        super(type);
         this.game = game;
-    }
-
-    public ServerMessage.ServerMessageType getServerMessageType() {
-        return serverMessageType;
     }
 
     public ChessGame getGame() {
         return game;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        LoadGameMessage that = (LoadGameMessage) o;
-        return serverMessageType == that.serverMessageType && Objects.equals(game, that.game);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(serverMessageType, game);
-    }
 }

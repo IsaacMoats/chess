@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import server.Server;
 import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -36,16 +37,11 @@ public class ConnectionManager {
     }
     private final Gson gson = new Gson();
 
-    public void broadcast(Session exclude, ServerMessage message, int gameId, ChessGame game) throws IOException {
+    public void broadcast(Session exclude, ServerMessage message, int gameId, ChessGame game, String username) throws IOException {
         String json;
-        if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-            ServerMessage loadGameMessage = new ServerMessage(
-                    ServerMessage.ServerMessageType.NOTIFICATION);
-            loadGameMessage.setMessage("Player has joined the game");
+            String messageToSend = String.format("%s has joined the game", username);
+            NotificationMessage loadGameMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, messageToSend);
             json = gson.toJson(loadGameMessage);
-        } else {
-            json = gson.toJson(message);
-        }
 
         for (Session s : connections.getOrDefault(gameId, Set.of())) {
             if (s.isOpen() && !s.equals(exclude)) {
@@ -54,13 +50,7 @@ public class ConnectionManager {
         }
     }
     public void sendSelf(Session session, ServerMessage message, ChessGame game) throws IOException {
-        String json;
-        if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-            websocket.messages.LoadGameMessage loadGameMessage = new LoadGameMessage(game);
-            json = gson.toJson(loadGameMessage);
-        } else {
-            json = gson.toJson(message);
-        }
+        String json = gson.toJson(message);
         session.getRemote().sendString(json);
     }
 

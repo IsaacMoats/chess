@@ -1,8 +1,10 @@
 package websocket.messages;
 
-public class NotificationMessage extends ServerMessage{
-    private final String message;
-    public NotificationMessage(ServerMessageType type, String message) {
+import java.util.Objects;
+
+public class ErrorMessage extends ServerMessage{
+    String message;
+    public ErrorMessage(ServerMessageType type, String message) {
         super(type);
         this.message = message;
     }
@@ -11,4 +13,5 @@ public class NotificationMessage extends ServerMessage{
     public String toString() {
         return message;
     }
+
 }
