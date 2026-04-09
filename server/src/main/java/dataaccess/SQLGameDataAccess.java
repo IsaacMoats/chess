@@ -142,7 +142,7 @@ public class SQLGameDataAccess {
         } catch (SQLException e) {
             throw new DataAccessException("Bad Connection", 500);
         }
-        return new ChessGame();
+        return null;
     }
 
     public void deleteGameData() throws DataAccessException {

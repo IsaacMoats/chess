@@ -63,32 +63,31 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     public void connect(WsContext ctx, UserGameCommand command) throws IOException, SQLException, DataAccessException {
-        String username = null;
-        int gameID = command.getGameID();
         try {
             AuthData authData = authDataAccess.getAuthData(command.getAuthToken());
             if (authData == null) {
                 ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: no access")));
                 return;
             }
-            username = authDataAccess.getUser(command.getAuthToken());
+            String username = authDataAccess.getUser(command.getAuthToken());
+            int gameID = command.getGameID();
             ChessGame game = gameDataAccess.getGame(gameID);
             if (game == null) {
                 ctx.send(new Gson().toJson(new ErrorMessage(ServerMessage.ServerMessageType.ERROR,
                         "Error: game does not exist")));
                 return;
             }
+            LoadGameMessage selfNotification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
+            String intro = username + " has joined the game. ";
+            connections.sendSelf(ctx.session, selfNotification, game);
+            NotificationMessage broadcastNotification =
+                    new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, intro);
+            connections.broadcast(ctx.session, broadcastNotification, gameID, game, username);
         } catch (DataAccessException e) {
             ctx.send(new Gson().toJson(
                     new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage())));
         }
-        ChessGame game = userService.getGame(command.getGameID());
-        LoadGameMessage selfNotification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
-        String intro = username + " has joined the game. ";
-        connections.sendSelf(ctx.session, selfNotification, game);
-        NotificationMessage broadcastNotification =
-                new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, intro);
-        connections.broadcast(ctx.session, broadcastNotification, gameID, game, username);
+
     }
 
     public void leave(int gameID, String authToken, Session session){
