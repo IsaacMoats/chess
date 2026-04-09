@@ -133,6 +133,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.sendSelf(ctx.session, selfNotification, game);
             LoadGameMessage broadcastGame = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
             connections.broadcast(ctx.session, broadcastGame, makeMoveCommand.getGameID(), null, game);
+            String moveMessage = username + " made the move " + move;
+            NotificationMessage notificationMessage =
+                    new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, moveMessage);
+            connections.broadcast(ctx.session, notificationMessage, makeMoveCommand.getGameID(), moveMessage, game);
+            if (game.isInCheckmate())
         } catch (Exception e) {
             ctx.send(new Gson().toJson(
                     new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: " + e.getMessage())));
