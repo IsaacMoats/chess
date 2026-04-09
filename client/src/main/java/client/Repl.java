@@ -25,12 +25,14 @@ public class Repl implements NotificationHandler {
     private final ServerFacade server;
     private String state = "signed out";
     private int gameTotal = 0;
-    private final WebSocketFacade ws;
+    private WebSocketFacade ws;
     private String color = null;
+    private String serverUrl = null;
 
     public Repl(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
-        ws = new WebSocketFacade(serverUrl, this);
+        ws = null;
+        this.serverUrl = serverUrl;
     }
 
     public void run() {
@@ -58,6 +60,7 @@ public class Repl implements NotificationHandler {
             state = "signed in";
             UserData userData = new UserData(params[0], params[1], params[2]);
             server.addUser(userData);
+            ws = new WebSocketFacade(serverUrl, this);
             this.authData = server.loginUser(userData);
             return "Welcome " + params[0] +". You have registered successfully and logged in.";
         }
@@ -70,6 +73,7 @@ public class Repl implements NotificationHandler {
             this.authData = server.loginUser(userData);
 
             state = "signed in";
+            ws = new WebSocketFacade(serverUrl, this);
             return "Welcome back " + params[0] +". You have successfully logged in.";
         } else {
             throw new DataAccessException("Expected: <Username> <Password>", 400);
@@ -101,7 +105,7 @@ public class Repl implements NotificationHandler {
     }
 
     public String listGames() throws DataAccessException {
-        if (!Objects.equals(state, "signed in")) {
+        if (!Objects.equals(state, "signed in") && !Objects.equals(state, "in game")) {
             return "Must be logged in to list games!";
         }
         var games = server.listGames();
@@ -169,11 +173,11 @@ public class Repl implements NotificationHandler {
         return printable;
     }
 
-    public String joinGame(String... params) throws DataAccessException {
+    public String joinGame(String... params) throws DataAccessException, IOException {
         if (params.length != 2) {
             return "Expected <GameID> <WHITE|BLACK>";
         }
-        if (!Objects.equals(state, "signed in")) {
+        if (!Objects.equals(state, "signed in") && !Objects.equals(state, "in game")) {
             return "Must be logged in to join games!";
         }
         try {
@@ -197,7 +201,6 @@ public class Repl implements NotificationHandler {
         this.gameID = gameID;
         String printable = "";
         ChessBoard board = game.getBoard();
-        //For black
         if (Objects.equals(params[1], "BLACK")) {
             printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
             for (int i = 1; i < 9; i++){
@@ -215,7 +218,7 @@ public class Repl implements NotificationHandler {
         }
         ws.enterGame(server.authToken, gameID);
         state = "in game";
-        return printable;
+        return "Joining";
     }
 
     private String printWhiteOnly(ChessBoard board) {
@@ -233,11 +236,11 @@ public class Repl implements NotificationHandler {
     }
 
 
-    public String watch(String... params) throws DataAccessException {
+    public String watch(String... params) throws DataAccessException, IOException {
         if (params.length != 1) {
             return "Input the number of a game to watch.";
         }
-        if (!Objects.equals(state, "signed in")) {
+        if (!Objects.equals(state, "signed in") && !Objects.equals(state, "in game")) {
             return "Must be logged in to watch games!";
         }
         try {
@@ -258,19 +261,23 @@ public class Repl implements NotificationHandler {
         ChessGame game = new ChessGame();
         ChessBoard board = game.getBoard();
         ws.enterGame(server.authToken, gameID);
-        return printWhiteOnly(board);
+//        ws.sendUserCommand(new UserGameCommand(
+//             UserGameCommand.CommandType.CONNECT,
+//               authData.authToken(),
+//               gameID));
+        return "Watching now";
     }
 
-    public void leave() throws IOException {
+    public String leave() throws IOException {
         if (authData == null) {
-            System.out.println("Cannot leave game when not signed in");
-            return;
+            return "Must sign in to leave game.";
         }
         ws.sendUserCommand(new UserGameCommand(
                 UserGameCommand.CommandType.LEAVE,
                 authData.authToken(),
                 this.gameID));
         state = "signed in";
+        return "Left game.";
     }
 
     public String move() throws Exception {
@@ -300,7 +307,7 @@ public class Repl implements NotificationHandler {
         } catch (Exception e) {
             return e.getMessage();
         }
-        return null;
+        return "Move sent";
     }
 
     public String eval(String input) {
@@ -320,12 +327,32 @@ public class Repl implements NotificationHandler {
                 case "HELP" -> help();
                 case "WATCH" -> watch(params);
                 case "MOVE" -> move();
-//                case "LEAVE" -> leave();
+                case "LEAVE" -> leave();
+                case "REDRAW" -> redraw();
                 default -> throw new IllegalStateException("Not on options list: " + cmd);
             };
         } catch (Throwable ex) {
             return ex.getMessage();
         }
+    }
+
+    public String redraw() {
+        ChessBoard board = this.currentGame.getBoard();
+        String printable = "";
+        if (Objects.equals(this.color, "black")) {
+            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+            for (int i = 1; i < 9; i++){
+                printable = printable.concat(RESET_BG_COLOR + i);
+                for(int j = 8; j > 0; j--){
+                    printable = printable.concat(printBoard(board, i, j));
+                }
+                printable = printable.concat(RESET_BG_COLOR + i + "\n");
+            }
+            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+        } else if (Objects.equals(this.color, "white")) {
+            printable = printable.concat(printWhiteOnly(board));
+        }
+        return printable;
     }
 
     public String help(){
@@ -361,6 +388,7 @@ public class Repl implements NotificationHandler {
 
     @Override
     public void loadGame(LoadGameMessage message) {
+        this.currentGame = message.getGame();
         ChessBoard board = this.currentGame.getBoard();
         String printable = "";
         if (Objects.equals(this.color, "black")) {
@@ -376,6 +404,8 @@ public class Repl implements NotificationHandler {
         } else if (Objects.equals(this.color, "white")) {
             printable = printable.concat(printWhiteOnly(board));
         }
+        System.out.println(printable);
+        System.out.print(message.getGame());
     }
 
     @Override
