@@ -287,6 +287,9 @@ public class Repl implements NotificationHandler {
         if (currentGame.getOver()) {
             return "The game is over.";
         }
+        if (currentGame == null) {
+            return "You are not in a game.";
+        }
         System.out.println("Starting position: ");
         String start = new Scanner(System.in).nextLine();
         System.out.println("End position: ");
@@ -353,12 +356,20 @@ public class Repl implements NotificationHandler {
     }
 
     public String resign() throws IOException {
-        ws.sendUserCommand(new UserGameCommand(
-                UserGameCommand.CommandType.RESIGN,
-                authData.authToken(),
-                gameID
-        ));
-        currentGame = null;
+        System.out.println("Are you sure you want to resign (yes/no)? ");
+        String confirmation = new Scanner(System.in).nextLine().toUpperCase();
+        if (!(Objects.equals(confirmation, "YES") || Objects.equals(confirmation, "NO"))) {
+            System.out.println("YES/NO was not selected. Please try to confirm again.");
+            resign();
+        }
+        if (Objects.equals(confirmation, "YES")) {
+            ws.sendUserCommand(new UserGameCommand(
+                    UserGameCommand.CommandType.RESIGN,
+                    authData.authToken(),
+                    gameID
+            ));
+            currentGame = null;
+        }
         return "Resigned";
     }
 

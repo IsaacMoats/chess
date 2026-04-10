@@ -149,7 +149,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             if (game.isInCheckmate(opponent)) {
                 game.setOver(true);
                 gameDataAccess.updateGame(makeMoveCommand.getGameID(), white, black, game);
-                String checkmateMessage = opponent + " has lost the game (checkmate)";
+                String checkmateMessage = opponentUsername + " has lost the game (checkmate)";
                 NotificationMessage checkmateSelf = new NotificationMessage(
                         ServerMessage.ServerMessageType.NOTIFICATION, checkmateMessage);
                 connections.broadcast(null, checkmateSelf, makeMoveCommand.getGameID(), checkmateMessage, game);
@@ -157,7 +157,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 String checkMessage = opponentUsername + " is in check!";
                 NotificationMessage checkNotification = new NotificationMessage(
                         ServerMessage.ServerMessageType.NOTIFICATION, checkMessage);
-                connections.broadcast(ctx.session, checkNotification, makeMoveCommand.getGameID(), checkMessage, game);
+                connections.broadcast(null, checkNotification, makeMoveCommand.getGameID(), checkMessage, game);
             } else if (game.isInStalemate(opponent)) {
                 game.setOver(true);
                 gameDataAccess.updateGame(makeMoveCommand.getGameID(), white, black, game);
