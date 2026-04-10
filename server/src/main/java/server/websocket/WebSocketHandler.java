@@ -249,9 +249,4 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         return true;
     }
 
-//    public void test(String username, int gameID) throws IOException {
-//        String message = "Joined the game" + username;
-//        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-//        connections.broadcast(null, notification, gameID);
-//    }
 }

@@ -208,15 +208,7 @@ public class Repl implements NotificationHandler {
         String printable = "";
         ChessBoard board = game.getBoard();
         if (Objects.equals(params[1], "BLACK")) {
-            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
-            for (int i = 1; i < 9; i++){
-                printable = printable.concat(RESET_BG_COLOR + i);
-                for(int j = 8; j > 0; j--){
-                    printable = printable.concat(printBoard(board, i, j));
-                }
-                printable = printable.concat(RESET_BG_COLOR + i + "\n");
-            }
-            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+            printable = printable.concat(printBlackOnly(board));
             this.color = "black";
         } else if (Objects.equals(params[1], "WHITE")) {
             this.color = "white";
@@ -239,6 +231,20 @@ public class Repl implements NotificationHandler {
         }
         printable = printable.concat(RESET_BG_COLOR + "\s\sA\s\sB\s\sC\s\sD\s\sE\s\sF\s\sG\s\sH\n");
         return printable;
+    }
+
+    private String printBlackOnly(ChessBoard board) {
+        String printable = "";
+        printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+        for (int i = 1; i < 9; i++){
+            printable = printable.concat(RESET_BG_COLOR + i);
+            for(int j = 8; j > 0; j--){
+                printable = printable.concat(printBoard(board, i, j));
+            }
+            printable = printable.concat(RESET_BG_COLOR + i + "\n");
+        }
+        printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+        return printable
     }
 
 
@@ -369,8 +375,9 @@ public class Repl implements NotificationHandler {
                     gameID
             ));
             currentGame = null;
+            return "Resigned";
         }
-        return "Resigned";
+        return "Not resigned. Continue playing.";
     }
 
     public String highlight() {
@@ -384,15 +391,7 @@ public class Repl implements NotificationHandler {
         try {
             this.highlight = makePosition(position);
             if (Objects.equals(this.color, "black")) {
-                printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
-                for (int i = 1; i < 9; i++){
-                    printable = printable.concat(RESET_BG_COLOR + i);
-                    for(int j = 8; j > 0; j--){
-                        printable = printable.concat(printBoard(board, i, j));
-                    }
-                    printable = printable.concat(RESET_BG_COLOR + i + "\n");
-                }
-                printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+                printable = printable.concat(printBlackOnly(board));
             } else if (Objects.equals(this.color, "white")) {
                 printable = printable.concat(printWhiteOnly(board));
             }
@@ -410,15 +409,7 @@ public class Repl implements NotificationHandler {
         ChessBoard board = this.currentGame.getBoard();
         String printable = "";
         if (Objects.equals(this.color, "black")) {
-            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
-            for (int i = 1; i < 9; i++){
-                printable = printable.concat(RESET_BG_COLOR + i);
-                for(int j = 8; j > 0; j--){
-                    printable = printable.concat(printBoard(board, i, j));
-                }
-                printable = printable.concat(RESET_BG_COLOR + i + "\n");
-            }
-            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+            printable = printable.concat(printBlackOnly(board));
         } else if (Objects.equals(this.color, "white")) {
             printable = printable.concat(printWhiteOnly(board));
         }
@@ -462,15 +453,7 @@ public class Repl implements NotificationHandler {
         ChessBoard board = this.currentGame.getBoard();
         String printable = "";
         if (Objects.equals(this.color, "black")) {
-            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
-            for (int i = 1; i < 9; i++){
-                printable = printable.concat(RESET_BG_COLOR + i);
-                for(int j = 8; j > 0; j--){
-                    printable = printable.concat(printBoard(board, i, j));
-                }
-                printable = printable.concat(RESET_BG_COLOR + i + "\n");
-            }
-            printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+            printable = printable.concat(printBlackOnly(board));
         } else if (Objects.equals(this.color, "white")) {
             printable = printable.concat(printWhiteOnly(board));
         }
