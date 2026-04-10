@@ -291,7 +291,18 @@ public class Repl implements NotificationHandler {
         String start = new Scanner(System.in).nextLine();
         System.out.println("End position: ");
         String end = new Scanner(System.in).nextLine();
-
+        if (start.length() > 2 || end.length() > 2) {
+            return "Enter only the letter followed by the number.";
+        }
+        if (start.isEmpty() || end.isEmpty()) {
+            return "Please enter a starting and ending position.";
+        }
+        if (!Character.isLetter(start.charAt(0)) || !Character.isDigit(start.charAt(1))){
+            return "Please enter the letter followed by the number in the starting position.";
+        }
+        if (!Character.isLetter(end.charAt(0)) || !Character.isDigit(end.charAt(1))){
+            return "Please entere the letter followed by the number in the ending position.";
+        }
         try {
             ChessPosition startPosition = makePosition(start);
             ChessPosition endPosition = makePosition(end);
