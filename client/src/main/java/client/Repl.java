@@ -264,13 +264,10 @@ public class Repl implements NotificationHandler {
         if (gameID < 0 || gameID > gameTotal) {
             return "Choose a valid game from the list!";
         }
-        ChessGame game = new ChessGame();
-        ChessBoard board = game.getBoard();
+        this.gameID = gameID;
+        this.color = "white";
+        state = "in game";
         ws.enterGame(server.authToken, gameID);
-//        ws.sendUserCommand(new UserGameCommand(
-//             UserGameCommand.CommandType.CONNECT,
-//               authData.authToken(),
-//               gameID));
         return "Watching now";
     }
 
@@ -344,6 +341,9 @@ public class Repl implements NotificationHandler {
     }
 
     public String highlight() {
+        if (currentGame == null) {
+            return "Not in a game";
+        }
         ChessBoard board = this.currentGame.getBoard();
         System.out.println("Choose piece to highlight");
         String position = new Scanner(System.in).nextLine();
@@ -371,6 +371,9 @@ public class Repl implements NotificationHandler {
     }
 
     public String redraw() {
+        if (currentGame == null) {
+            return "Not in a game.";
+        }
         ChessBoard board = this.currentGame.getBoard();
         String printable = "";
         if (Objects.equals(this.color, "black")) {
