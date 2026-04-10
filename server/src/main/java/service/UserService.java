@@ -77,7 +77,4 @@ public class UserService {
         return gameDataAccess.listGames();
     }
 
-//    public AuthData getAuthData(String user) {
-//        return;
-//    }
 }

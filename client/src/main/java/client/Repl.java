@@ -344,11 +344,22 @@ public class Repl implements NotificationHandler {
                 case "LEAVE" -> leave();
                 case "REDRAW" -> redraw();
                 case "HIGHLIGHT" -> highlight();
+                case "RESIGN" -> resign();
                 default -> throw new IllegalStateException("Not on options list: " + cmd);
             };
         } catch (Throwable ex) {
             return ex.getMessage();
         }
+    }
+
+    public String resign() throws IOException {
+        ws.sendUserCommand(new UserGameCommand(
+                UserGameCommand.CommandType.RESIGN,
+                authData.authToken(),
+                gameID
+        ));
+        currentGame = null;
+        return "Resigned";
     }
 
     public String highlight() {

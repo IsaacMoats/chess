@@ -58,15 +58,6 @@ public class WebSocketFacade extends Endpoint {
     }
 
 
-    public void leaveGame(String authToken, int gameID) throws DataAccessException {
-        try {
-            UserGameCommand userGameCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
-            this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
-        } catch (IOException ex) {
-            throw new DataAccessException(ex.getMessage(), 400);
-        }
-    }
-
     public void sendUserCommand(UserGameCommand userGameCommand) throws IOException {
         session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
     }
