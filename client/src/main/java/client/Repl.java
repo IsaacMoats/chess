@@ -244,7 +244,7 @@ public class Repl implements NotificationHandler {
             printable = printable.concat(RESET_BG_COLOR + i + "\n");
         }
         printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
-        return printable
+        return printable;
     }
 
 
