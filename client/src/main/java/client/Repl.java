@@ -13,9 +13,8 @@ import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
+
 import static ui.EscapeSequences.*;
 
 public class Repl implements NotificationHandler {
@@ -28,6 +27,7 @@ public class Repl implements NotificationHandler {
     private WebSocketFacade ws;
     private String color = null;
     private String serverUrl = null;
+    private ChessPosition highlight = null;
 
     public Repl(String serverUrl) throws DataAccessException {
         server = new ServerFacade(serverUrl);
@@ -130,47 +130,53 @@ public class Repl implements NotificationHandler {
             return printable;
     }
 
-    private String printBoard(ChessBoard board, int i, int j) {
-        String printable = "";
-        ChessPosition position = new ChessPosition(i, j);
-        ChessPiece piece = board.getPiece(position);
-        if (((i%2) != 0 && (j%2)!=0) || ((i%2) == 0 && (j%2) == 0)) {
-            printable = printable.concat(SET_BG_COLOR_BLACK);
-        } else  {
-            printable = printable.concat(SET_BG_COLOR_WHITE);
+    private String printBoard(ChessBoard board, int row, int col) {
+        ChessPosition pos = new ChessPosition(row, col);
+        ChessPiece piece = board.getPiece(pos);
+        Collection<ChessMove> validMoves = Collections.emptyList();
+        if (highlight != null) {
+            validMoves = currentGame.validMoves(highlight);
+        }
+        boolean isLegalMoveSquare = false;
+        for (ChessMove move : validMoves) {
+            if (move.getEndPosition().equals(pos)) {
+                isLegalMoveSquare = true;
+                break;
+            }
+        }
+        String square = "";
+
+        if (isLegalMoveSquare) {
+            square += SET_BG_COLOR_GREEN;
+        } else if ((row + col) % 2 == 0) {
+            square += SET_BG_COLOR_WHITE;
+        } else {
+            square += SET_BG_COLOR_BLACK;
         }
         if (piece == null) {
-            printable = printable.concat(EMPTY);
-        } else if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-            if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-                printable = printable.concat(WHITE_KING);
-            } else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
-                printable = printable.concat(WHITE_ROOK);
-            } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
-                printable = printable.concat(WHITE_BISHOP);
-            } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
-                printable = printable.concat(WHITE_QUEEN);
-            } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
-                printable = printable.concat(WHITE_KNIGHT);
-            } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-                printable = printable.concat(WHITE_PAWN);
-            }
+            square += EMPTY;
         } else {
-            if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-                printable = printable.concat(BLACK_KING);
-            } else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
-                printable = printable.concat(BLACK_ROOK);
-            } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
-                printable = printable.concat(BLACK_BISHOP);
-            } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
-                printable = printable.concat(BLACK_QUEEN);
-            } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
-                printable = printable.concat(BLACK_KNIGHT);
-            } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-                printable = printable.concat(BLACK_PAWN);
-            }
+            square += switch (piece.getTeamColor()) {
+                case WHITE -> switch (piece.getPieceType()) {
+                    case KING -> WHITE_KING;
+                    case QUEEN -> WHITE_QUEEN;
+                    case ROOK -> WHITE_ROOK;
+                    case BISHOP -> WHITE_BISHOP;
+                    case KNIGHT -> WHITE_KNIGHT;
+                    case PAWN -> WHITE_PAWN;
+                };
+                case BLACK -> switch (piece.getPieceType()) {
+                    case KING -> BLACK_KING;
+                    case QUEEN -> BLACK_QUEEN;
+                    case ROOK -> BLACK_ROOK;
+                    case BISHOP -> BLACK_BISHOP;
+                    case KNIGHT -> BLACK_KNIGHT;
+                    case PAWN -> BLACK_PAWN;
+                };
+            };
         }
-        return printable;
+
+        return square;
     }
 
     public String joinGame(String... params) throws DataAccessException, IOException {
@@ -329,8 +335,36 @@ public class Repl implements NotificationHandler {
                 case "MOVE" -> move();
                 case "LEAVE" -> leave();
                 case "REDRAW" -> redraw();
+                case "HIGHLIGHT" -> highlight();
                 default -> throw new IllegalStateException("Not on options list: " + cmd);
             };
+        } catch (Throwable ex) {
+            return ex.getMessage();
+        }
+    }
+
+    public String highlight() {
+        ChessBoard board = this.currentGame.getBoard();
+        System.out.println("Choose piece to highlight");
+        String position = new Scanner(System.in).nextLine();
+        String printable = "";
+        try {
+            this.highlight = makePosition(position);
+            if (Objects.equals(this.color, "black")) {
+                printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+                for (int i = 1; i < 9; i++){
+                    printable = printable.concat(RESET_BG_COLOR + i);
+                    for(int j = 8; j > 0; j--){
+                        printable = printable.concat(printBoard(board, i, j));
+                    }
+                    printable = printable.concat(RESET_BG_COLOR + i + "\n");
+                }
+                printable = printable.concat(RESET_BG_COLOR + "\s\sH\s\sG\s\sF\s\sE\s\sD\s\sC\s\sB\s\sA\n");
+            } else if (Objects.equals(this.color, "white")) {
+                printable = printable.concat(printWhiteOnly(board));
+            }
+            highlight = null;
+            return printable;
         } catch (Throwable ex) {
             return ex.getMessage();
         }

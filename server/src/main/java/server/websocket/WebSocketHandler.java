@@ -96,6 +96,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     public void makeMove(WsContext ctx, MakeMoveCommand makeMoveCommand) throws IOException, SQLException, DataAccessException {
         ChessGame.TeamColor opponent = null;
+        String opponentUsername = null;
         try {
             if (!authDataID(makeMoveCommand.getAuthToken(), makeMoveCommand.getGameID(), ctx)) {
                return;
@@ -112,8 +113,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String username = authDataAccess.getUser(makeMoveCommand.getAuthToken());
             if (Objects.equals(username, white)) {
                 opponent = ChessGame.TeamColor.BLACK;
+                opponentUsername = black;
             } else if (Objects.equals(username, black)) {
                 opponent = ChessGame.TeamColor.WHITE;
+                opponentUsername = white;
             }
             if (Objects.equals(username, white) && game.getTeamTurn() != ChessGame.TeamColor.WHITE) {
                 ctx.send(new Gson().toJson(
@@ -151,7 +154,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                         ServerMessage.ServerMessageType.NOTIFICATION, checkmateMessage);
                 connections.broadcast(null, checkmateSelf, makeMoveCommand.getGameID(), checkmateMessage, game);
             } else if (game.isInCheck(opponent)) {
-
+                String checkMessage = opponentUsername + " is in check!";
+                NotificationMessage checkNotification = new NotificationMessage(
+                        ServerMessage.ServerMessageType.NOTIFICATION, checkMessage);
+                connections.broadcast(ctx.session, checkNotification, makeMoveCommand.getGameID(), checkMessage, game);
+            } else if (game.isInStalemate(opponent)) {
+                game.setOver(true);
+                gameDataAccess.updateGame(makeMoveCommand.getGameID(), white, black, game);
             }
         } catch (Exception e) {
             ctx.send(new Gson().toJson(
